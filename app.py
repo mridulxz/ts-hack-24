@@ -19,10 +19,8 @@ from flask import (
 from flask_login import LoginManager, UserMixin, current_user, login_user, logout_user
 from pymongo import MongoClient
 
-# Load environment variables
 load_dotenv()
 
-# MongoDB connection
 mongodb_url = os.environ.get("MONGO_URI")
 client = MongoClient(mongodb_url)
 db = client.get_default_database()
@@ -50,7 +48,7 @@ app.config["OAUTH2_PROVIDERS"] = {
 }
 
 login = LoginManager(app)
-login.login_view = "index"
+login.login_view = "login"
 
 
 class User(UserMixin):
@@ -72,7 +70,8 @@ def load_user(user_id):
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    # return render_template("index.html")
+    return redirect(url_for("login"))
 
 
 @app.route("/logout")
@@ -80,6 +79,11 @@ def logout():
     logout_user()
     flash("You have been logged out.")
     return redirect(url_for("index"))
+
+
+@app.route("/login")
+def login():
+    return render_template("login.html")
 
 
 @app.route("/authorize/<provider>")
@@ -177,7 +181,6 @@ def oauth2_callback(provider):
         }
         user = User(user_dict)
     else:
-        # Update profile picture if changed
         if existing_user.get("profile_picture") != profile_picture:
             users_collection.update_one(
                 {"_id": existing_user["_id"]},
