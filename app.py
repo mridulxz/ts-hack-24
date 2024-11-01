@@ -21,7 +21,7 @@ from flask_sqlalchemy import SQLAlchemy
 load_dotenv()
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = "top secret!"
+app.config["SECRET_KEY"] = "lelagooning"
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db.sqlite"
 app.config["OAUTH2_PROVIDERS"] = {
     "google": {
@@ -159,7 +159,6 @@ def oauth2_callback(provider):
         db.session.add(user)
         db.session.commit()
     else:
-        # Update profile picture if changed
         if user.profile_picture != profile_picture:
             user.profile_picture = profile_picture
             db.session.commit()
