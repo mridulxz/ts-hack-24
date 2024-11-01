@@ -3,6 +3,7 @@ import secrets
 from urllib.parse import urlencode
 
 import requests
+from bson.objectid import ObjectId
 from dotenv import load_dotenv
 from flask import (
     Flask,
@@ -16,13 +17,19 @@ from flask import (
     url_for,
 )
 from flask_login import LoginManager, UserMixin, current_user, login_user, logout_user
-from flask_sqlalchemy import SQLAlchemy
+from pymongo import MongoClient
 
+# Load environment variables
 load_dotenv()
 
+# MongoDB connection
+mongodb_url = os.environ.get("MONGO_URI")
+client = MongoClient(mongodb_url)
+db = client.get_default_database()
+users_collection = db.users
+
 app = Flask(__name__)
-app.config["SECRET_KEY"] = "lelagooning"
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db.sqlite"
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
 app.config["OAUTH2_PROVIDERS"] = {
     "google": {
         "client_id": os.environ.get("GOOGLE_CLIENT_ID"),
@@ -42,22 +49,25 @@ app.config["OAUTH2_PROVIDERS"] = {
     },
 }
 
-db = SQLAlchemy(app)
 login = LoginManager(app)
 login.login_view = "index"
 
 
-class User(UserMixin, db.Model):
-    __tablename__ = "users"
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(64), nullable=False)
-    email = db.Column(db.String(64), nullable=True)
-    profile_picture = db.Column(db.String(256), nullable=True)
+class User(UserMixin):
+    def __init__(self, user_dict):
+        self.id = str(user_dict["_id"])
+        self.username = user_dict["username"]
+        self.email = user_dict["email"]
+        self.profile_picture = user_dict.get("profile_picture")
+
+    def get_id(self):
+        return self.id
 
 
 @login.user_loader
-def load_user(id):
-    return db.session.get(User, int(id))
+def load_user(user_id):
+    user_dict = users_collection.find_one({"_id": ObjectId(user_id)})
+    return User(user_dict) if user_dict else None
 
 
 @app.route("/")
@@ -153,22 +163,31 @@ def oauth2_callback(provider):
     username = provider_data["userinfo"]["name"](user_info)
     profile_picture = provider_data["userinfo"]["picture"](user_info)
 
-    user = db.session.scalar(db.select(User).where(User.email == email))
-    if user is None:
-        user = User(email=email, username=username, profile_picture=profile_picture)
-        db.session.add(user)
-        db.session.commit()
+    existing_user = users_collection.find_one({"email": email})
+
+    if existing_user is None:
+        result = users_collection.insert_one(
+            {"username": username, "email": email, "profile_picture": profile_picture}
+        )
+        user_dict = {
+            "_id": result.inserted_id,
+            "username": username,
+            "email": email,
+            "profile_picture": profile_picture,
+        }
+        user = User(user_dict)
     else:
-        if user.profile_picture != profile_picture:
-            user.profile_picture = profile_picture
-            db.session.commit()
+        # Update profile picture if changed
+        if existing_user.get("profile_picture") != profile_picture:
+            users_collection.update_one(
+                {"_id": existing_user["_id"]},
+                {"$set": {"profile_picture": profile_picture}},
+            )
+        user = User(existing_user)
 
     login_user(user)
     return redirect(url_for("index"))
 
-
-with app.app_context():
-    db.create_all()
 
 if __name__ == "__main__":
     app.run(debug=True)
