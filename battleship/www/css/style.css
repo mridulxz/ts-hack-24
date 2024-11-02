@@ -328,7 +328,8 @@ input[type="submit"],
 }
 
 .console ul li.fading {
-  animation: fadeOut 1s ease forwards;
+  animation: fadeOut 0.8s ease forwards;
+  pointer-events: none;
 }
 
 /* Message animations */
@@ -351,6 +352,7 @@ input[type="submit"],
   to {
     opacity: 0;
     transform: translateY(-20px);
+    margin-top: -35px;
   }
 }
 
