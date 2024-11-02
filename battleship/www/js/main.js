@@ -1,133 +1,190 @@
-(function (_, d) {
-  // Global State
-  const state = {
-    playerId: localStorage.getItem("playerId") || "",
-    games: [],
-  };
+const STORAGE_KEYS = {
+  PLAYER_ID: "playerId",
+};
 
-  d.addEventListener("DOMContentLoaded", () => {
-    // UI References
-    const tabTriggers = d.querySelectorAll(".tab-trigger");
-    const secondaryButtons = d.querySelectorAll(".secondary-btn");
-    const gamesList = d.querySelector("#games-list");
-    const joinForm = d.querySelector("#join-form");
-    const createForm = d.querySelector("#create-form");
+const SELECTORS = {
+  TAB_TRIGGER: ".tab-trigger",
+  SECONDARY_BTN: ".secondary-btn",
+  GAMES_LIST: "#games-list",
+  JOIN_FORM: "#join-form",
+  CREATE_FORM: "#create-form",
+  TAB: ".tab",
+};
 
-    // Init function
-    (async function init() {
-      const hasPlayerNoId = state.playerId === "";
+class GameState {
+  constructor() {
+    this.playerId = localStorage.getItem(STORAGE_KEYS.PLAYER_ID) || "";
+    this.games = [];
+  }
 
-      if (hasPlayerNoId) {
-        state.playerId = generateUUID();
-        localStorage.setItem("playerId", state.playerId);
-      }
+  initializePlayerId() {
+    if (!this.playerId) {
+      this.playerId = this.generateUUID();
+      localStorage.setItem(STORAGE_KEYS.PLAYER_ID, this.playerId);
+    }
+    return this.playerId;
+  }
 
-      // Get list of available games from server
-      state.games = await fetchGames();
-      updateGamesList(state.games, gamesList);
+  generateUUID() {
+    return Math.random().toString(36).substring(2) + Date.now().toString(36);
+  }
 
-      [joinForm, createForm].forEach((form) => {
-        const hiddenInput = d.createElement("input");
-        hiddenInput.type = "hidden";
-        hiddenInput.value = state.playerId;
-        hiddenInput.name = "playerId";
-        form.appendChild(hiddenInput);
-      });
+  async updateGames() {
+    this.games = await this.fetchGames();
+    return this.games;
+  }
 
-      // Register UI Event Listeners
-      tabTriggers.forEach((tabTrigger) => {
-        tabTrigger.addEventListener("click", async (e) => {
-          const elementId = e.target.closest("button").id;
+  async fetchGames() {
+    try {
+      const response = await fetch("/games");
+      return await response.json();
+    } catch (error) {
+      console.error("Error fetching games:", error);
+      return [];
+    }
+  }
+}
 
-          const allTabs = d.querySelectorAll(".tab");
-          allTabs.forEach((tab) => tab.classList.add("hidden"));
-          d.querySelector(`#${e.target.dataset.targets}`).classList.remove(
-            "hidden"
-          );
+class GameUI {
+  constructor(gameState) {
+    this.state = gameState;
+    this.elements = {
+      tabTriggers: document.querySelectorAll(SELECTORS.TAB_TRIGGER),
+      secondaryButtons: document.querySelectorAll(SELECTORS.SECONDARY_BTN),
+      gamesList: document.querySelector(SELECTORS.GAMES_LIST),
+      joinForm: document.querySelector(SELECTORS.JOIN_FORM),
+      createForm: document.querySelector(SELECTORS.CREATE_FORM),
+    };
+  }
 
-          if (elementId === "join-btn") {
-            state.games = await fetchGames();
-            updateGamesList(state.games, gamesList);
-          }
-        });
-      });
+  initialize() {
+    this.setupForms();
+    this.registerEventListeners();
+  }
 
-      secondaryButtons.forEach((button) => {
-        button.addEventListener("click", async (e) => {
-          const elementId = e.target.closest("button").id;
+  setupForms() {
+    [this.elements.joinForm, this.elements.createForm].forEach((form) => {
+      if (!form) return;
 
-          switch (elementId) {
-            case "refresh-games-btn":
-              e.preventDefault();
-              state.games = await fetchGames();
-              updateGamesList(state.games, gamesList);
-              break;
-            case "toggle-music-btn":
-              console.log("Toggle Music Btn Pressed!");
-              alert("Coming Soon!");
-              break;
-            case "toggle-sound-btn":
-              console.log("Toggle Sound Btn Pressed!");
-              alert("Coming Soon!");
-              break;
-            case "toggle-fullscreen-btn":
-              toggleFullScreen(d.body);
-              break;
-          }
-        });
-      });
-    })();
-  });
-
-  // Update games list
-  function updateGamesList(gamesData, gamesListElement) {
-    gamesListElement.innerHTML = "";
-
-    gamesData.forEach((game) => {
-      if (game.players[0].id !== state.playerId) {
-        gamesListElement.innerHTML += `
-          <option value="${game.id}">${game.gameName} (${game.players.length}/2)</option>
-        `;
-      }
+      const hiddenInput = document.createElement("input");
+      hiddenInput.type = "hidden";
+      hiddenInput.value = this.state.playerId;
+      hiddenInput.name = "playerId";
+      form.appendChild(hiddenInput);
     });
   }
 
-  // Fetch list of games from server
-  async function fetchGames() {
-    const games = await (await fetch("/games")).json();
-    return games;
+  updateGamesList(games) {
+    if (!this.elements.gamesList) return;
+
+    this.elements.gamesList.innerHTML = games
+      .filter((game) => game.players[0].id !== this.state.playerId)
+      .map(
+        (game) => `
+        <option value="${game.id}">${game.gameName} (${game.players.length}/2)</option>
+      `
+      )
+      .join("");
   }
 
-  // Toggle Fullscreen
-  function toggleFullScreen(elem) {
-    if (
-      (d.fullScreenElement !== undefined && d.fullScreenElement === null) ||
-      (d.msFullscreenElement !== undefined && d.msFullscreenElement === null) ||
-      (d.mozFullScreen !== undefined && !d.mozFullScreen) ||
-      (d.webkitIsFullScreen !== undefined && !d.webkitIsFullScreen)
-    ) {
-      if (elem.requestFullScreen) {
-        elem.requestFullScreen();
-      } else if (elem.mozRequestFullScreen) {
-        elem.mozRequestFullScreen();
-      } else if (elem.webkitRequestFullScreen) {
-        elem.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
-      } else if (elem.msRequestFullscreen) {
-        elem.msRequestFullscreen();
-      }
-    } else {
-      if (d.cancelFullScreen) {
-        d.cancelFullScreen();
-      } else if (d.mozCancelFullScreen) {
-        d.mozCancelFullScreen();
-      } else if (d.webkitCancelFullScreen) {
-        d.webkitCancelFullScreen();
-      } else if (d.msExitFullscreen) {
-        d.msExitFullscreen();
-      }
+  showTab(tabId) {
+    const allTabs = document.querySelectorAll(SELECTORS.TAB);
+    allTabs.forEach((tab) => tab.classList.add("hidden"));
+
+    const targetTab = document.querySelector(`#${tabId}`);
+    if (targetTab) {
+      targetTab.classList.remove("hidden");
     }
   }
-})(window, document);
 
-const generateUUID = () =>
-  Math.random().toString(36).substring(2) + Date.now().toString(36);
+  toggleFullScreen() {
+    const elem = document.body;
+    const fullscreenApi = {
+      requestFullscreen:
+        elem.requestFullscreen ||
+        elem.mozRequestFullScreen ||
+        elem.webkitRequestFullScreen ||
+        elem.msRequestFullscreen,
+      exitFullscreen:
+        document.exitFullscreen ||
+        document.mozCancelFullScreen ||
+        document.webkitExitFullscreen ||
+        document.msExitFullscreen,
+    };
+
+    if (
+      !document.fullscreenElement &&
+      !document.mozFullScreenElement &&
+      !document.webkitFullscreenElement &&
+      !document.msFullscreenElement
+    ) {
+      fullscreenApi.requestFullscreen.call(elem);
+    } else {
+      fullscreenApi.exitFullscreen.call(document);
+    }
+  }
+
+  registerEventListeners() {
+    this.elements.tabTriggers.forEach((trigger) => {
+      trigger.addEventListener("click", async (e) => {
+        const button = e.target.closest("button");
+        if (!button) return;
+
+        const targetTab = button.dataset.targets;
+        this.showTab(targetTab);
+
+        if (button.id === "join-btn") {
+          const games = await this.state.updateGames();
+          this.updateGamesList(games);
+        }
+      });
+    });
+
+    this.elements.secondaryButtons.forEach((button) => {
+      button.addEventListener("click", async (e) => {
+        const elementId = e.target.closest("button").id;
+
+        switch (elementId) {
+          case "refresh-games-btn":
+            e.preventDefault();
+            const games = await this.state.updateGames();
+            this.updateGamesList(games);
+            break;
+
+          case "toggle-music-btn":
+            console.log("Toggle Music Btn Pressed!");
+            alert("Coming Soon!");
+            break;
+
+          case "toggle-sound-btn":
+            console.log("Toggle Sound Btn Pressed!");
+            alert("Coming Soon!");
+            break;
+
+          case "toggle-fullscreen-btn":
+            this.toggleFullScreen();
+            break;
+        }
+      });
+    });
+  }
+}
+
+class BattleshipGame {
+  constructor() {
+    this.state = new GameState();
+    this.ui = new GameUI(this.state);
+  }
+
+  async initialize() {
+    this.state.initializePlayerId();
+    await this.state.updateGames();
+    this.ui.initialize();
+    this.ui.updateGamesList(this.state.games);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const game = new BattleshipGame();
+  game.initialize();
+});
