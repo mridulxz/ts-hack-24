@@ -23,7 +23,6 @@ const CONFIG = {
     OVER: "gameOver",
   },
 };
-
 // Calculate total ship cells for victory condition
 const TOTAL_SHIP_CELLS = Object.values(CONFIG.SHIPS).reduce(
   (sum, ship) => sum + ship.size * ship.count,
@@ -63,7 +62,6 @@ class GameServer {
   }
 
   setupRoutes() {
-    // Get available games
     this.app.get("/games", (req, res) => {
       try {
         const availableGames = Object.values(this.games).filter(
@@ -76,7 +74,6 @@ class GameServer {
       }
     });
 
-    // Join existing game
     this.app.get("/games/join", (req, res) => {
       try {
         const { playerName, playerId, game: gameId } = req.query;
@@ -111,7 +108,6 @@ class GameServer {
       }
     });
 
-    // Create new game
     this.app.post("/games", (req, res) => {
       try {
         const { playerName, playerId } = req.body;
@@ -165,7 +161,6 @@ class GameServer {
     const size = CONFIG.SHIPS[shipType].size;
     const grid = game[`${playerId}_grid`];
 
-    // Validate placement
     if (isVertical && y + size > 10) {
       socket.emit(
         "message",
@@ -182,7 +177,7 @@ class GameServer {
       return false;
     }
 
-    // Check for overlapping ships
+    // check for overlapping ships
     for (let i = 0; i < size; i++) {
       const checkY = isVertical ? y + i : y;
       const checkX = isVertical ? x : x + i;
@@ -195,7 +190,6 @@ class GameServer {
       }
     }
 
-    // Place the ship
     for (let i = 0; i < size; i++) {
       const placeY = isVertical ? y + i : y;
       const placeX = isVertical ? x : x + i;
@@ -213,7 +207,6 @@ class GameServer {
     const targetGrid = game[`${targetId}_grid`];
     const currentCell = targetGrid[y][x];
 
-    // Check if cell was already hit
     if (currentCell === 2 || currentCell === 3) {
       socket.emit("message", "You already hit that spot! Try another one.");
       return false;
@@ -231,7 +224,6 @@ class GameServer {
       socket.emit("message", "Direct hit on enemy ship!");
       socket.broadcast.to(game.id).emit("message", "Your ship was hit!");
 
-      // Check for game over
       if (game[`${targetId}_shipsLost`] >= TOTAL_SHIP_CELLS) {
         game.gameState = CONFIG.GAME_STATES.OVER;
         this.io.to(game.id).emit("changeGameState", game.gameState);
@@ -340,7 +332,6 @@ class GameServer {
               y
             )
           ) {
-            // Update grids for both players
             socket.emit("updateGrid", {
               gridToUpdate: "enemyGrid",
               data: state.otherPlayerGrid,
@@ -350,7 +341,6 @@ class GameServer {
               data: game[`${targetPlayer.id}_grid`],
             });
 
-            // Switch turns
             this.io.to(game.id).emit("nextRound");
             socket.emit("yourTurn", false);
             socket.broadcast.to(game.id).emit("yourTurn", true);
@@ -390,5 +380,4 @@ class GameServer {
   }
 }
 
-// Start the server
 new GameServer();

@@ -1,6 +1,5 @@
 class BattleshipGame {
   constructor() {
-    // Configuration
     this.CONFIG = {
       GAME_STATES: {
         INITIALIZING: "gameIsInitializing",
@@ -20,7 +19,6 @@ class BattleshipGame {
       LETTERS: ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"],
     };
 
-    // Game state
     this.state = {
       gameId: null,
       gameState: this.CONFIG.GAME_STATES.INITIALIZING,
@@ -37,10 +35,8 @@ class BattleshipGame {
       ),
     };
 
-    // UI Elements cache
     this.ui = {};
 
-    // Socket instance
     this.socket = null;
 
     // Bind methods to maintain context
@@ -52,7 +48,6 @@ class BattleshipGame {
 
   async initialize() {
     try {
-      // Get URL parameters
       const params = Qs.parse(location.search, { ignoreQueryPrefix: true });
       const { playerName, game, playerId } = params;
 
@@ -61,34 +56,25 @@ class BattleshipGame {
         return;
       }
 
-      // Set initial state
       this.state.gameId = game;
       this.state.playerName = playerName;
       this.state.playerId = playerId;
 
-      // Initialize socket connection
       this.socket = io();
 
-      // Cache UI elements
       this.cacheUIElements();
-
-      // Set up event listeners
       this.setupEventListeners();
-
-      // Set up socket event handlers
       this.setupSocketHandlers();
 
-      // Join game
       this.socket.emit("joinGame", {
         gameId: this.state.gameId,
         playerId: this.state.playerId,
         playerName: this.state.playerName,
       });
 
-      // Initialize UI
       this.initializeUI();
 
-      // Clean up URL
+      // clean up URL
       window.history.replaceState({}, document.title, "/play.html");
     } catch (error) {
       console.error("Game initialization error:", error);
@@ -97,21 +83,17 @@ class BattleshipGame {
   }
 
   cacheUIElements() {
-    // Header elements
     this.ui.headerLogoLink = document.querySelector(".header .logo a");
     this.ui.currentRoundText = document.querySelector("#current-round-txt");
     this.ui.currentTurnText = document.querySelector("#current-turn-txt");
 
-    // Grid elements
     this.ui.enemyGrid = document.querySelector("#enemy-grid");
     this.ui.friendlyGrid = document.querySelector("#friendly-grid");
 
-    // Chat elements
     this.ui.chatForm = document.querySelector("#console form");
     this.ui.chatMessagesList = document.querySelector("#chat-messages-list");
     this.ui.chatInput = document.querySelector("#chat-message-input");
 
-    // Button elements
     this.ui.showRulesBtn = document.querySelector("#show-rules-btn");
     this.ui.toggleMusicBtn = document.querySelector("#toogle-music-btn");
     this.ui.toggleSoundBtn = document.querySelector("#toogle-sound-btn");
@@ -120,24 +102,19 @@ class BattleshipGame {
     );
     this.ui.leaveGameBtn = document.querySelector("#leave-game-btn");
 
-    // Ship selection rows
     this.ui.shipRows = document.querySelectorAll(".info table tbody tr");
   }
 
   setupEventListeners() {
-    // Grid click handlers
     this.ui.enemyGrid.addEventListener("click", this.handleGridClick);
     this.ui.friendlyGrid.addEventListener("click", this.handleGridClick);
 
-    // Ship selection handlers
     this.ui.shipRows.forEach((row) => {
       row.addEventListener("click", this.handleShipSelection);
     });
 
-    // Chat handlers
     this.ui.chatForm.addEventListener("submit", this.handleChatSubmit);
 
-    // Button handlers
     this.ui.headerLogoLink.addEventListener("click", (e) => {
       e.preventDefault();
       this.leaveGame();
@@ -148,7 +125,6 @@ class BattleshipGame {
       this.toggleFullScreen()
     );
 
-    // Keyboard handlers
     document.addEventListener("keydown", this.handleKeyPress);
   }
 
@@ -434,7 +410,6 @@ class BattleshipGame {
     this.ui.currentTurnText.innerHTML = "Initializing Game...";
     this.addConsoleMessage("Please wait! Initializing Game...");
 
-    // Initialize grids
     this.updateGrid(
       this.ui.enemyGrid,
       "Enemy Waters",
@@ -448,7 +423,6 @@ class BattleshipGame {
   }
 }
 
-// Initialize game when DOM is loaded
 document.addEventListener("DOMContentLoaded", () => {
   const game = new BattleshipGame();
   game.initialize();

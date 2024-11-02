@@ -1,6 +1,5 @@
 class BattleshipLobby {
   constructor() {
-    // Configuration
     this.CONFIG = {
       STORAGE_KEYS: {
         PLAYER_ID: "playerId",
@@ -11,7 +10,6 @@ class BattleshipLobby {
       REFRESH_INTERVAL: 10000, // 10 seconds
     };
 
-    // State
     this.state = {
       playerId:
         localStorage.getItem(this.CONFIG.STORAGE_KEYS.PLAYER_ID) ||
@@ -20,10 +18,8 @@ class BattleshipLobby {
       activeTab: "main-tab",
     };
 
-    // UI Elements
     this.ui = {};
 
-    // Bind methods
     this.handleTabChange = this.handleTabChange.bind(this);
     this.handleSecondaryButtonClick =
       this.handleSecondaryButtonClick.bind(this);
@@ -34,10 +30,8 @@ class BattleshipLobby {
 
   async initialize() {
     try {
-      // Cache UI elements
       this.cacheUIElements();
 
-      // Initialize player ID if needed
       if (!localStorage.getItem(this.CONFIG.STORAGE_KEYS.PLAYER_ID)) {
         localStorage.setItem(
           this.CONFIG.STORAGE_KEYS.PLAYER_ID,
@@ -45,16 +39,10 @@ class BattleshipLobby {
         );
       }
 
-      // Set up event listeners
       this.setupEventListeners();
-
-      // Add player ID to forms
       this.setupForms();
-
-      // Initial games fetch
       await this.refreshGamesList();
 
-      // Set up auto-refresh for games list
       this.startGameListRefresh();
     } catch (error) {
       console.error("Lobby initialization error:", error);
@@ -65,25 +53,20 @@ class BattleshipLobby {
   }
 
   cacheUIElements() {
-    // Tab elements
     this.ui.tabs = {
       triggers: document.querySelectorAll(".tab-trigger"),
       content: document.querySelectorAll(".tab"),
     };
 
-    // Button elements
     this.ui.secondaryButtons = document.querySelectorAll(".secondary-btn");
 
-    // Form elements
     this.ui.forms = {
       join: document.querySelector("#join-form"),
       create: document.querySelector("#create-form"),
     };
 
-    // Games list
     this.ui.gamesList = document.querySelector("#games-list");
 
-    // Error container (create if doesn't exist)
     if (!document.querySelector("#error-container")) {
       const errorContainer = document.createElement("div");
       errorContainer.id = "error-container";
@@ -105,17 +88,14 @@ class BattleshipLobby {
   }
 
   setupEventListeners() {
-    // Tab navigation
     this.ui.tabs.triggers.forEach((trigger) => {
       trigger.addEventListener("click", this.handleTabChange);
     });
 
-    // Secondary buttons
     this.ui.secondaryButtons.forEach((button) => {
       button.addEventListener("click", this.handleSecondaryButtonClick);
     });
 
-    // Forms
     this.ui.forms.join.addEventListener("submit", this.handleJoinFormSubmit);
     this.ui.forms.create.addEventListener(
       "submit",
@@ -138,16 +118,12 @@ class BattleshipLobby {
       const targetTab = event.target.dataset.targets;
       if (!targetTab) return;
 
-      // Hide all tabs
       this.ui.tabs.content.forEach((tab) => tab.classList.add("hidden"));
 
-      // Show target tab
       document.querySelector(`#${targetTab}`).classList.remove("hidden");
 
-      // Update state
       this.state.activeTab = targetTab;
 
-      // Refresh games list if switching to join tab
       if (targetTab === "join-tab") {
         await this.refreshGamesList();
       }
@@ -239,15 +215,13 @@ class BattleshipLobby {
   updateGamesListUI() {
     if (!this.ui.gamesList) return;
 
-    // Clear current options
     this.ui.gamesList.innerHTML = "";
 
-    // Filter out games where current player is the creator
+    // filter out games where current player is the creator
     const availableGames = this.state.games.filter(
       (game) => game.players[0].id !== this.state.playerId
     );
 
-    // Add games to select element
     availableGames.forEach((game) => {
       const option = document.createElement("option");
       option.value = game.id;
@@ -255,7 +229,6 @@ class BattleshipLobby {
       this.ui.gamesList.appendChild(option);
     });
 
-    // Update UI based on available games
     const noGamesAvailable = availableGames.length === 0;
     this.ui.gamesList.disabled = noGamesAvailable;
 
@@ -308,7 +281,6 @@ class BattleshipLobby {
   }
 }
 
-// Initialize lobby when DOM is loaded
 document.addEventListener("DOMContentLoaded", () => {
   const lobby = new BattleshipLobby();
   lobby.initialize();
