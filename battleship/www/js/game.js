@@ -362,19 +362,32 @@
 
     consoleElement.appendChild(messageElement);
 
-    setTimeout(() => {
-      messageElement.classList.add("faded");
-    }, 10000);
-
-    const isAtBottom =
-      Math.abs(
-        consoleElement.scrollHeight -
-          consoleElement.scrollTop -
-          consoleElement.clientHeight
-      ) < 2;
-
-    if (isAtBottom) {
+    const scrollToBottom = () => {
       consoleElement.scrollTop = consoleElement.scrollHeight;
+    };
+
+    scrollToBottom();
+
+    setTimeout(() => {
+      messageElement.classList.add("fading");
+      setTimeout(() => {
+        messageElement.remove();
+      }, 800);
+    }, 15000);
+
+    consoleElement.addEventListener("scroll", () => {
+      const isScrolledToBottom =
+        Math.abs(
+          consoleElement.scrollHeight -
+            consoleElement.scrollTop -
+            consoleElement.clientHeight
+        ) < 2;
+
+      consoleElement.dataset.autoScroll = isScrolledToBottom;
+    });
+
+    if (consoleElement.dataset.autoScroll !== "false") {
+      scrollToBottom();
     }
   }
 

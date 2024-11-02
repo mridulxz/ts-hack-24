@@ -293,6 +293,7 @@ input[type="submit"],
   margin: 0 0 10px 0;
   padding: 0;
   scroll-behavior: smooth;
+  padding-right: 6px;
 }
 
 /* Custom scrollbar for messages */
