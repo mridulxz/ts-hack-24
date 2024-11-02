@@ -231,43 +231,77 @@ io.on("connection", (socket) => {
         state.otherPlayerGrid[y][x] = 3;
         thisGame[`${otherPlayerId}_shipsLost`]++;
 
-        // Track hits and check for sunk ships
+        let shipFound = false;
+        let shipType = null;
         let shipSunk = false;
-        let sunkShipType = "";
 
-        // Determine which ship was hit by counting consecutive hits
-        Object.entries(ships).forEach(([shipType, shipInfo]) => {
-          let consecutiveHits = 0;
-          // Check horizontal
-          for (let i = Math.max(0, x - shipInfo.size + 1); i <= x; i++) {
-            let isValid = true;
-            for (let j = 0; j < shipInfo.size && isValid; j++) {
-              if (
-                i + j >= 10 ||
-                thisGame[`${otherPlayerId}_grid`][y][i + j] !== 3
-              ) {
-                isValid = false;
+        for (let shipName in ships) {
+          const shipSize = ships[shipName].size;
+          for (
+            let startX = Math.max(0, x - shipSize + 1);
+            startX <= Math.min(x, 9 - shipSize + 1);
+            startX++
+          ) {
+            let isValidShip = true;
+            let hitCount = 0;
+            for (let i = 0; i < shipSize; i++) {
+              const cellValue =
+                thisGame[`${otherPlayerId}_grid`][y][startX + i];
+              if (cellValue !== 1 && cellValue !== 3) {
+                isValidShip = false;
+                break;
               }
+              if (cellValue === 3) hitCount++;
             }
-            if (isValid) {
-              thisGame[`${otherPlayerId}_shipHits`][shipType]++;
-              if (
-                thisGame[`${otherPlayerId}_shipHits`][shipType] ===
-                shipInfo.size
-              ) {
+            if (isValidShip) {
+              shipFound = true;
+              shipType = shipName;
+              if (hitCount === shipSize) {
                 shipSunk = true;
-                sunkShipType = shipType;
               }
               break;
             }
           }
-        });
+          if (shipFound) break;
+        }
+
+        if (!shipFound) {
+          for (let shipName in ships) {
+            const shipSize = ships[shipName].size;
+            for (
+              let startY = Math.max(0, y - shipSize + 1);
+              startY <= Math.min(y, 9 - shipSize + 1);
+              startY++
+            ) {
+              let isValidShip = true;
+              let hitCount = 0;
+              for (let i = 0; i < shipSize; i++) {
+                const cellValue =
+                  thisGame[`${otherPlayerId}_grid`][startY + i][x];
+                if (cellValue !== 1 && cellValue !== 3) {
+                  isValidShip = false;
+                  break;
+                }
+                if (cellValue === 3) hitCount++;
+              }
+              if (isValidShip) {
+                shipFound = true;
+                shipType = shipName;
+                if (hitCount === shipSize) {
+                  shipSunk = true;
+                }
+                break;
+              }
+            }
+            if (shipFound) break;
+          }
+        }
 
         if (shipSunk) {
-          socket.emit("message", `You sunk the enemy's ${sunkShipType}!`);
+          socket.emit("message", `You sunk the enemy's ${shipType}!`);
           socket.broadcast
             .to(state.gameId)
-            .emit("message", `The enemy sunk your ${sunkShipType}!`);
+            .emit("message", `The enemy sunk your ${shipType}!`);
         } else {
           socket.emit(
             "message",
@@ -295,7 +329,6 @@ io.on("connection", (socket) => {
           thisGame.gameState = gameStates.gameOver;
           io.to(state.gameId).emit("changeGameState", thisGame.gameState);
 
-          // Enhanced victory messages
           socket.emit(
             "message",
             `Congratulations! You've won the game by destroying all enemy ships!`
