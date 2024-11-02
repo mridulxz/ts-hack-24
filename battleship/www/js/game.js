@@ -1,429 +1,476 @@
-class BattleshipGame {
-  constructor() {
-    this.CONFIG = {
-      GAME_STATES: {
-        INITIALIZING: "gameIsInitializing",
-        INITIALIZED: "gameInitialized",
-        SETTING_SHIPS: "setShipsRound",
-        RUNNING: "gameRunning",
-        OVER: "gameOver",
-      },
-      SHIPS: {
-        carrier: { size: 5, count: 1 },
-        battleship: { size: 4, count: 1 },
-        cruiser: { size: 3, count: 1 },
-        destroyer: { size: 2, count: 1 },
-        submarine: { size: 1, count: 1 },
-      },
-      GRID_SIZE: 10,
-      LETTERS: ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"],
-    };
+(function (w, d) {
+  // Get data from query string
+  const { playerName, game, playerId } = Qs.parse(location.search, {
+    ignoreQueryPrefix: true,
+  });
 
-    this.state = {
-      gameId: null,
-      gameState: this.CONFIG.GAME_STATES.INITIALIZING,
-      playerName: "",
-      playerId: "",
-      enemyGridData: this.getInitialGridData(),
-      playerGridData: this.getInitialGridData(),
-      currentRound: 0,
-      yourTurn: false,
-      selectedShipType: null,
-      isVertical: false,
-      placedShips: Object.fromEntries(
-        Object.keys(this.CONFIG.SHIPS).map((ship) => [ship, false])
-      ),
-    };
+  const redirectToHomePage = () => {
+    w.location = "/";
+  };
 
-    this.ui = {};
+  // If any of the query-string params was not set => redirect to home-screen
+  (!playerName || !game || !playerId) && redirectToHomePage();
 
-    this.socket = null;
+  // Init socket.io
+  const socket = io();
+  // Disconnect socket when browser window is closed
+  w.onclose = socket.disconnect;
 
-    // Bind methods to maintain context
-    this.handleGridClick = this.handleGridClick.bind(this);
-    this.handleShipSelection = this.handleShipSelection.bind(this);
-    this.handleChatSubmit = this.handleChatSubmit.bind(this);
-    this.handleKeyPress = this.handleKeyPress.bind(this);
-  }
+  // Initial Grid Data
+  const initialGridData = getInitialGridData();
 
-  async initialize() {
-    try {
-      const params = Qs.parse(location.search, { ignoreQueryPrefix: true });
-      const { playerName, game, playerId } = params;
+  // Strings
+  const strings = {
+    getInitialGameConsoleString: () => `Please wait! Initializing Game...`,
+    getInitialCurrentTurnString: () => "Initializing Game...",
+    getLeaveConfirmText: () => `Are you sure you want to leave the game?`,
+    getEnemyGridCaption: () => "Enemy Waters",
+    getHomeGridCaption: () => "Home Waters",
+    getGameHasNotStartedErrorMessage: () =>
+      "You cannot attack yet, because the game hasn't started. Please place all of your ships for the game to begin!",
+    getWrongFieldClickedErrorMessage: () =>
+      "There's no point in clicking here! Click on your enemies' play field to attack his ships.",
+    getGameIsAlreadyOverErrorMessage: () =>
+      "Game is over! You can stop clicking!",
+  };
 
-      if (!playerName || !game || !playerId) {
-        this.redirectToHome();
-        return;
-      }
+  // Game states
+  const gameStates = {
+    gameIsInitializing: "gameIsInitializing",
+    gameInitialized: "gameInitialized",
+    setShipsRound: "setShipsRound",
+    gameRunning: "gameRunning",
+    gameOver: "gameOver",
+  };
 
-      this.state.gameId = game;
-      this.state.playerName = playerName;
-      this.state.playerId = playerId;
+  // Global state variables
+  const state = {
+    gameId: game,
+    gameState: gameStates.gameIsInitializing,
+    playerName: playerName,
+    playerId: playerId,
+    enemyPlayerGridData: initialGridData,
+    PlayerGridData: initialGridData,
+    currentRound: 0,
+    yourTurn: false,
+    selectedShipType: null,
+    isVertical: false,
+    placedShips: {
+      carrier: false,
+      battleship: false,
+      cruiser: false,
+      destroyer: false,
+      submarine: false,
+    },
+  };
 
-      this.socket = io();
+  const ships = {
+    carrier: { size: 5, count: 1 },
+    battleship: { size: 4, count: 1 },
+    cruiser: { size: 3, count: 1 },
+    destroyer: { size: 2, count: 1 },
+    submarine: { size: 1, count: 1 },
+  };
 
-      this.cacheUIElements();
-      this.setupEventListeners();
-      this.setupSocketHandlers();
+  // Prohibit modification of state
+  Object.freeze(gameStates);
+  Object.seal(state);
 
-      this.socket.emit("joinGame", {
-        gameId: this.state.gameId,
-        playerId: this.state.playerId,
-        playerName: this.state.playerName,
+  d.addEventListener("keydown", (e) => {
+    if (e.key === "r" || e.key === "R") {
+      state.isVertical = !state.isVertical;
+      const chatMessagesList = d.querySelector("#chat-messages-list");
+      addConsoleMessage(
+        chatMessagesList,
+        `Rotation: ${state.isVertical ? "Vertical" : "Horizontal"}`
+      );
+    }
+  });
+
+  // Init game once DOM elements are fully loaded
+  d.addEventListener("DOMContentLoaded", () => {
+    // UI References
+    const headerLogoLink = d.querySelector(".header .logo a");
+    const currentRoundText = d.querySelector("#current-round-txt");
+    const currentTurnText = d.querySelector("#current-turn-txt");
+    const playerGrids = d.querySelectorAll(".grid");
+    const enemyGrid = d.querySelector("#enemy-grid");
+    const friendlyGrid = d.querySelector("#friendly-grid");
+    const chatForm = d.querySelector("#console form");
+    const chatMessagesList = d.querySelector("#chat-messages-list");
+    const chatInput = d.querySelector("#chat-message-input");
+    const showRulesBtn = d.querySelector("#show-rules-btn");
+    const toggleMusicBtn = d.querySelector("#toogle-music-btn");
+    const toggleSoundBtn = d.querySelector("#toogle-sound-btn");
+    const toggleFullScreenBtn = d.querySelector("#toggle-fullscreen-btn");
+    const leaveGameBtn = d.querySelector("#leave-game-btn");
+
+    d.querySelectorAll(".info table tbody tr").forEach((row) => {
+      row.addEventListener("click", () => {
+        const shipType = row.cells[1].textContent.toLowerCase();
+        if (ships[shipType]) {
+          // Check if ship is already placed using state.placedShips
+          if (state.placedShips[shipType]) {
+            addConsoleMessage(
+              chatMessagesList,
+              `You've already placed your ${shipType}!`
+            );
+            state.selectedShipType = null;
+            return;
+          }
+          state.selectedShipType = shipType;
+          addConsoleMessage(
+            chatMessagesList,
+            `Selected ${shipType} (size: ${ships[shipType].size}). Press R to rotate.`
+          );
+        }
+      });
+    });
+
+    // Init Game functions
+    (function init() {
+      // Join Game
+      socket.emit("joinGame", {
+        gameId: state.gameId,
+        playerId: state.playerId,
+        playerName: state.playerName,
       });
 
-      this.initializeUI();
+      // On receiving message
+      socket.on("message", (message) =>
+        addConsoleMessage(chatMessagesList, message)
+      );
 
-      // clean up URL
-      window.history.replaceState({}, document.title, "/play.html");
-    } catch (error) {
-      console.error("Game initialization error:", error);
-      this.redirectToHome();
+      // On receiving chatMessage
+      socket.on("chatMessage", ({ playerName, message }) => {
+        console.log(playerName, message);
+        addConsoleMessage(chatMessagesList, message, playerName);
+      });
+
+      socket.on("nextRound", () => {
+        state.currentRound++;
+        currentRoundText.innerHTML = state.currentRound;
+      });
+
+      socket.on("yourTurn", (value) => {
+        state.yourTurn = value;
+        if (state.yourTurn) {
+          currentTurnText.innerHTML = `It's your turn!`;
+        } else {
+          currentTurnText.innerHTML = `Other player's turn...`;
+        }
+      });
+
+      socket.on("updateGrid", ({ gridToUpdate, data }) => {
+        switch (gridToUpdate) {
+          case "enemyGrid":
+            updateGrid(enemyGrid, "Enemy Waters", data);
+            break;
+
+          case "friendlyGrid":
+            updateGrid(friendlyGrid, "Home Waters", data);
+            break;
+        }
+      });
+
+      socket.on("shipPlaced", ({ shipType }) => {
+        state.placedShips[shipType] = true;
+        // Visually update the row to show it's placed
+        const shipRow = Array.from(
+          d.querySelectorAll(".info table tbody tr")
+        ).find((row) => row.cells[1].textContent.toLowerCase() === shipType);
+        if (shipRow) {
+          shipRow.classList.add("placed");
+        }
+      });
+
+      // On receiving gameStateChange
+      socket.on("changeGameState", (newGameState) => {
+        switch (newGameState) {
+          case gameStates.gameInitialized:
+            state.gameState = gameStates.gameInitialized;
+            currentTurnText.innerHTML = "Initialized";
+            console.log(state.gameState);
+            break;
+
+          case gameStates.setShipsRound:
+            state.gameState = gameStates.setShipsRound;
+            currentTurnText.innerHTML = "Place your ships!";
+            console.log(state.gameState);
+            break;
+
+          case gameStates.gameRunning: {
+            state.gameState = gameStates.gameRunning;
+            currentTurnText.innerHTML = "Let the fighting begin!";
+            console.log(state.gameState);
+            break;
+          }
+
+          case gameStates.gameOver:
+            state.gameState = gameStates.gameOver;
+            currentTurnText.innerHTML = "Game Over!";
+            setTimeout(() => redirectToHomePage(), 10000);
+            console.log(state.gameState);
+            break;
+        }
+      });
+
+      // Clean up URL => remove query string
+      w.history.replaceState({}, d.title, "/" + "play.html");
+
+      addConsoleMessage(
+        chatMessagesList,
+        strings.getInitialGameConsoleString()
+      );
+      chatInput.focus();
+      currentRoundText.innerHTML = "0";
+      currentTurnText.innerHTML = strings.getInitialCurrentTurnString();
+
+      // Initialize Player Grids
+      initializePlayerGrids(
+        [enemyGrid, friendlyGrid],
+        [strings.getEnemyGridCaption(), strings.getHomeGridCaption()],
+        initialGridData
+      );
+
+      // Register UI Event Listeners
+      headerLogoLink.addEventListener("click", (e) => {
+        e.preventDefault();
+        leaveGame();
+      });
+
+      playerGrids.forEach((grid) => {
+        grid.addEventListener("click", (e) => {
+          const elementId = e.target.closest(".grid").id;
+
+          if (state.gameState === gameStates.gameOver) {
+            addConsoleMessage(
+              chatMessagesList,
+              strings.getGameIsAlreadyOverErrorMessage()
+            );
+          } else if (
+            state.gameState === gameStates.gameRunning &&
+            state.yourTurn &&
+            e.target.classList.contains("cell")
+          ) {
+            switch (elementId) {
+              case "enemy-grid":
+                socket.emit("clickOnEnemyGrid", {
+                  x: e.target.dataset.x,
+                  y: e.target.dataset.y,
+                });
+                console.log(
+                  `Click on Enemy Grid ${e.target.dataset.y.toUpperCase()}${
+                    e.target.dataset.x
+                  }`
+                );
+                break;
+
+              case "friendly-grid":
+                addConsoleMessage(
+                  chatMessagesList,
+                  strings.getWrongFieldClickedErrorMessage()
+                );
+                break;
+            }
+          } else if (
+            state.gameState === gameStates.setShipsRound &&
+            e.target.classList.contains("cell")
+          ) {
+            switch (elementId) {
+              case "enemy-grid":
+                addConsoleMessage(
+                  chatMessagesList,
+                  strings.getGameHasNotStartedErrorMessage()
+                );
+                break;
+
+              case "friendly-grid":
+                if (!state.selectedShipType) {
+                  addConsoleMessage(
+                    chatMessagesList,
+                    "Please select a ship type first by clicking on it in the Fleet table"
+                  );
+                  return;
+                }
+                socket.emit("clickOnFriendlyGrid", {
+                  x: parseInt(e.target.dataset.x),
+                  y: e.target.dataset.y,
+                  shipType: state.selectedShipType,
+                  isVertical: state.isVertical,
+                });
+                state.selectedShipType = null;
+                break;
+            }
+          }
+        });
+      });
+
+      showRulesBtn.addEventListener("click", (e) => {
+        console.log("Show Rules Btn Pressed!");
+        alert("Coming Soon!");
+      });
+
+      toggleMusicBtn.addEventListener("click", (e) => {
+        console.log("Toggle Music Btn Pressed!");
+        alert("Coming Soon!");
+      });
+
+      toggleSoundBtn.addEventListener("click", (e) => {
+        console.log("Toggle Sound Btn Pressed!");
+        alert("Coming Soon!");
+      });
+
+      toggleFullScreenBtn.addEventListener("click", (e) => {
+        toggleFullScreen(d.body);
+      });
+
+      leaveGameBtn.addEventListener("click", (e) => {
+        leaveGame();
+      });
+
+      d.addEventListener("keydown", (e) => {
+        if (e.keyCode === 13) chatInput.focus();
+      });
+
+      chatForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        socket.emit("chatMessage", {
+          playerName: state.playerName,
+          message: chatInput.value,
+        });
+        chatInput.value = "";
+        chatInput.focus();
+      });
+    })();
+  });
+
+  // Init Player Grids
+  function initializePlayerGrids(playerGridRoots, captions, data) {
+    playerGridRoots.forEach((root, index) => {
+      updateGrid(root, captions[index], data);
+    });
+  }
+
+  function addConsoleMessage(
+    consoleElement,
+    messageTxt,
+    senderName = "[System]"
+  ) {
+    const messageElement = document.createElement("li");
+    messageElement.innerHTML = `<strong>${senderName}</strong>: ${messageTxt}`;
+
+    consoleElement.appendChild(messageElement);
+
+    setTimeout(() => {
+      messageElement.classList.add("faded");
+    }, 10000);
+
+    const isAtBottom =
+      Math.abs(
+        consoleElement.scrollHeight -
+          consoleElement.scrollTop -
+          consoleElement.clientHeight
+      ) < 2;
+
+    if (isAtBottom) {
+      consoleElement.scrollTop = consoleElement.scrollHeight;
     }
   }
 
-  cacheUIElements() {
-    this.ui.headerLogoLink = document.querySelector(".header .logo a");
-    this.ui.currentRoundText = document.querySelector("#current-round-txt");
-    this.ui.currentTurnText = document.querySelector("#current-turn-txt");
-
-    this.ui.enemyGrid = document.querySelector("#enemy-grid");
-    this.ui.friendlyGrid = document.querySelector("#friendly-grid");
-
-    this.ui.chatForm = document.querySelector("#console form");
-    this.ui.chatMessagesList = document.querySelector("#chat-messages-list");
-    this.ui.chatInput = document.querySelector("#chat-message-input");
-
-    this.ui.showRulesBtn = document.querySelector("#show-rules-btn");
-    this.ui.toggleMusicBtn = document.querySelector("#toogle-music-btn");
-    this.ui.toggleSoundBtn = document.querySelector("#toogle-sound-btn");
-    this.ui.toggleFullScreenBtn = document.querySelector(
-      "#toggle-fullscreen-btn"
-    );
-    this.ui.leaveGameBtn = document.querySelector("#leave-game-btn");
-
-    this.ui.shipRows = document.querySelectorAll(".info table tbody tr");
-  }
-
-  setupEventListeners() {
-    this.ui.enemyGrid.addEventListener("click", this.handleGridClick);
-    this.ui.friendlyGrid.addEventListener("click", this.handleGridClick);
-
-    this.ui.shipRows.forEach((row) => {
-      row.addEventListener("click", this.handleShipSelection);
-    });
-
-    this.ui.chatForm.addEventListener("submit", this.handleChatSubmit);
-
-    this.ui.headerLogoLink.addEventListener("click", (e) => {
-      e.preventDefault();
-      this.leaveGame();
-    });
-
-    this.ui.leaveGameBtn.addEventListener("click", () => this.leaveGame());
-    this.ui.toggleFullScreenBtn.addEventListener("click", () =>
-      this.toggleFullScreen()
-    );
-
-    document.addEventListener("keydown", this.handleKeyPress);
-  }
-
-  setupSocketHandlers() {
-    this.socket.on("message", (message) => {
-      this.addConsoleMessage(message);
-    });
-
-    this.socket.on("chatMessage", ({ playerName, message }) => {
-      this.addConsoleMessage(message, playerName);
-    });
-
-    this.socket.on("nextRound", () => {
-      this.state.currentRound++;
-      this.ui.currentRoundText.innerHTML = this.state.currentRound;
-    });
-
-    this.socket.on("yourTurn", (value) => {
-      this.state.yourTurn = value;
-      this.ui.currentTurnText.innerHTML = value
-        ? "It's your turn!"
-        : "Other player's turn...";
-    });
-
-    this.socket.on("updateGrid", ({ gridToUpdate, data }) => {
-      const grid =
-        gridToUpdate === "enemyGrid" ? this.ui.enemyGrid : this.ui.friendlyGrid;
-      const caption =
-        gridToUpdate === "enemyGrid" ? "Enemy Waters" : "Home Waters";
-      this.updateGrid(grid, caption, data);
-    });
-
-    this.socket.on("shipPlaced", ({ shipType }) => {
-      this.state.placedShips[shipType] = true;
-      this.updateShipRowStatus(shipType);
-    });
-
-    this.socket.on("changeGameState", (newGameState) => {
-      this.handleGameStateChange(newGameState);
-    });
-  }
-
-  handleGameStateChange(newGameState) {
-    this.state.gameState = newGameState;
-
-    switch (newGameState) {
-      case this.CONFIG.GAME_STATES.INITIALIZED:
-        this.ui.currentTurnText.innerHTML = "Initialized";
-        break;
-
-      case this.CONFIG.GAME_STATES.SETTING_SHIPS:
-        this.ui.currentTurnText.innerHTML = "Place your ships!";
-        break;
-
-      case this.CONFIG.GAME_STATES.RUNNING:
-        this.ui.currentTurnText.innerHTML = "Let the fighting begin!";
-        break;
-
-      case this.CONFIG.GAME_STATES.OVER:
-        this.ui.currentTurnText.innerHTML = "Game Over!";
-        setTimeout(() => this.redirectToHome(), 10000);
-        break;
-    }
-  }
-
-  handleGridClick(event) {
-    const cell = event.target;
-    if (!cell.classList.contains("cell")) return;
-
-    const grid = event.currentTarget;
-    const x = parseInt(cell.dataset.x);
-    const y = cell.dataset.y;
-
-    if (this.state.gameState === this.CONFIG.GAME_STATES.OVER) {
-      this.addConsoleMessage("Game is over! You can stop clicking!");
-      return;
-    }
-
-    if (grid.id === "enemy-grid") {
-      this.handleEnemyGridClick(x, y);
-    } else {
-      this.handleFriendlyGridClick(x, y);
-    }
-  }
-
-  handleEnemyGridClick(x, y) {
+  // Toggle Fullscreen
+  function toggleFullScreen(elem) {
     if (
-      this.state.gameState !== this.CONFIG.GAME_STATES.RUNNING ||
-      !this.state.yourTurn
+      (d.fullScreenElement !== undefined && d.fullScreenElement === null) ||
+      (d.msFullscreenElement !== undefined && d.msFullscreenElement === null) ||
+      (d.mozFullScreen !== undefined && !d.mozFullScreen) ||
+      (d.webkitIsFullScreen !== undefined && !d.webkitIsFullScreen)
     ) {
-      this.addConsoleMessage("It's not your turn yet!");
-      return;
-    }
-
-    this.socket.emit("clickOnEnemyGrid", { x, y });
-  }
-
-  handleFriendlyGridClick(x, y) {
-    if (this.state.gameState !== this.CONFIG.GAME_STATES.SETTING_SHIPS) {
-      this.addConsoleMessage(
-        "You can only place ships during the setup phase!"
-      );
-      return;
-    }
-
-    if (!this.state.selectedShipType) {
-      this.addConsoleMessage("Please select a ship type first!");
-      return;
-    }
-
-    this.socket.emit("clickOnFriendlyGrid", {
-      x,
-      y,
-      shipType: this.state.selectedShipType,
-      isVertical: this.state.isVertical,
-    });
-
-    this.state.selectedShipType = null;
-  }
-
-  handleShipSelection(event) {
-    const row = event.currentTarget;
-    const shipType = row.cells[1].textContent.toLowerCase();
-
-    if (!this.CONFIG.SHIPS[shipType]) return;
-
-    if (this.state.placedShips[shipType]) {
-      this.addConsoleMessage(`You've already placed your ${shipType}!`);
-      this.state.selectedShipType = null;
-      return;
-    }
-
-    this.state.selectedShipType = shipType;
-    this.addConsoleMessage(
-      `Selected ${shipType} (size: ${this.CONFIG.SHIPS[shipType].size}). Press R to rotate.`
-    );
-  }
-
-  handleKeyPress(event) {
-    if (event.key === "r" || event.key === "R") {
-      this.state.isVertical = !this.state.isVertical;
-      this.addConsoleMessage(
-        `Rotation: ${this.state.isVertical ? "Vertical" : "Horizontal"}`
-      );
+      if (elem.requestFullScreen) {
+        elem.requestFullScreen();
+      } else if (elem.mozRequestFullScreen) {
+        elem.mozRequestFullScreen();
+      } else if (elem.webkitRequestFullScreen) {
+        elem.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
+      } else if (elem.msRequestFullscreen) {
+        elem.msRequestFullscreen();
+      }
+    } else {
+      if (d.cancelFullScreen) {
+        d.cancelFullScreen();
+      } else if (d.mozCancelFullScreen) {
+        d.mozCancelFullScreen();
+      } else if (d.webkitCancelFullScreen) {
+        d.webkitCancelFullScreen();
+      } else if (d.msExitFullscreen) {
+        d.msExitFullscreen();
+      }
     }
   }
 
-  handleChatSubmit(event) {
-    event.preventDefault();
-    const message = this.ui.chatInput.value.trim();
-
-    if (message) {
-      this.socket.emit("chatMessage", {
-        playerName: this.state.playerName,
-        message,
-      });
-      this.ui.chatInput.value = "";
-    }
-
-    this.ui.chatInput.focus();
-  }
-
-  updateGrid(rootElement, captionText, data) {
-    const tableHeaderCells = Array.from(
-      { length: this.CONFIG.GRID_SIZE },
-      (_, i) => `<th>${i}</th>`
-    ).join("");
-
+  // Update grid
+  function updateGrid(rootElement, captionText, data) {
+    const letters = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"];
+    const tableHeaderCells = new Array(10)
+      .fill("", 0, 10)
+      .map((_, i) => `<th>${i}</th>`)
+      .join("");
     const tableContent = data
       .map((rowData, indexY) => {
-        const cells = rowData
-          .map((cellData, indexX) => {
-            const cellClass = this.getCellClass(cellData);
-            return `<td class="cell ${cellClass}" data-x="${indexX}" data-y="${this.CONFIG.LETTERS[indexY]}"></td>`;
-          })
-          .join("");
-
         return `
-        <tr>
-          <th>${this.CONFIG.LETTERS[indexY]}</th>
-          ${cells}
-        </tr>
-      `;
+    <tr>
+    <th>${letters[indexY]}</th>
+      ${rowData
+        .map((cellData, indexX) => {
+          switch (cellData) {
+            case 3:
+              return `<td class="cell ship-hit" data-x="${indexX}" data-y="${letters[indexY]}"></td>`;
+            case 2:
+              return `<td class="cell water-hit" data-x="${indexX}" data-y="${letters[indexY]}"></td>`;
+            case 1:
+              return `<td class="cell ship" data-x="${indexX}" data-y="${letters[indexY]}"></td>`;
+            case 0:
+            default:
+              return `<td class="cell" data-x="${indexX}" data-y="${letters[indexY]}"></td>`;
+          }
+        })
+        .join("")}
+    </tr>
+    `;
       })
       .join("");
 
     rootElement.innerHTML = `
-      <table>
-        <caption><h5><strong>${captionText}</strong></h5></caption>
-        <thead>
-          <tr><th></th>${tableHeaderCells}</tr>
-        </thead>
-        <tbody>${tableContent}</tbody>
-      </table>
-    `;
+    <table>
+      <caption>
+        <h5><strong>${captionText}</strong></h5>
+      </caption>
+      <thead>
+        <th></th>
+        ${tableHeaderCells}
+      </thead>
+      <tbody>
+        ${tableContent}
+      </tbody>
+    </table>
+  `;
   }
+  // Utility Functions
 
-  getCellClass(cellData) {
-    switch (cellData) {
-      case 3:
-        return "ship-hit";
-      case 2:
-        return "water-hit";
-      case 1:
-        return "ship";
-      default:
-        return "";
+  // Initial grid data
+  function getInitialGridData(width = 10, height = 10, initialCellValue = 0) {
+    const gridArray = [];
+
+    for (let i = 0; i < height; i++) {
+      gridArray.push(new Array(width).fill(initialCellValue));
     }
+
+    return gridArray;
   }
 
-  updateShipRowStatus(shipType) {
-    const shipRow = Array.from(this.ui.shipRows).find(
-      (row) => row.cells[1].textContent.toLowerCase() === shipType
-    );
-    if (shipRow) {
-      shipRow.classList.add("placed");
-    }
+  // Leave Game
+  function leaveGame() {
+    confirm(strings.getLeaveConfirmText()) && redirectToHomePage();
+    socket.disconnect();
   }
-
-  addConsoleMessage(message, sender = "[System]") {
-    const messageElement = document.createElement("li");
-    messageElement.innerHTML = `<strong>${sender}</strong>: ${message}`;
-    
-    this.ui.chatMessagesList.appendChild(messageElement);
-
-    let fadeTimeout;
-    const startFadeOut = () => {
-      fadeTimeout = setTimeout(() => {
-        messageElement.classList.add('fading');
-        setTimeout(() => {
-          if (messageElement.parentElement) {
-            messageElement.remove();
-          }
-        }, 1000);
-      }, 15000);
-    };
-
-    messageElement.addEventListener('mouseenter', () => {
-      clearTimeout(fadeTimeout);
-      messageElement.classList.remove('fading');
-    });
-
-    messageElement.addEventListener('mouseleave', () => {
-      startFadeOut();
-    });
-
-    startFadeOut();
-    
-    const isAtBottom = this.ui.chatMessagesList.scrollHeight - this.ui.chatMessagesList.scrollTop === this.ui.chatMessagesList.clientHeight;
-    if (isAtBottom) {
-      this.ui.chatMessagesList.scrollTop = this.ui.chatMessagesList.scrollHeight;
-    }
-  }
-
-  getInitialGridData() {
-    return Array.from({ length: this.CONFIG.GRID_SIZE }, () =>
-      Array(this.CONFIG.GRID_SIZE).fill(0)
-    );
-  }
-
-  toggleFullScreen() {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen();
-    } else {
-      document.exitFullscreen();
-    }
-  }
-
-  leaveGame() {
-    if (confirm("Are you sure you want to leave the game?")) {
-      this.socket.disconnect();
-      this.redirectToHome();
-    }
-  }
-
-  redirectToHome() {
-    window.location = "/";
-  }
-
-  initializeUI() {
-    this.ui.chatInput.focus();
-    this.ui.currentRoundText.innerHTML = "0";
-    this.ui.currentTurnText.innerHTML = "Initializing Game...";
-    this.addConsoleMessage("Please wait! Initializing Game...");
-
-    this.updateGrid(
-      this.ui.enemyGrid,
-      "Enemy Waters",
-      this.state.enemyGridData
-    );
-    this.updateGrid(
-      this.ui.friendlyGrid,
-      "Home Waters",
-      this.state.playerGridData
-    );
-  }
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  const game = new BattleshipGame();
-  game.initialize();
-});
+})(window, document);

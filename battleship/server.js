@@ -4,31 +4,97 @@ const socketio = require("socket.io");
 const Game = require("./models/Game");
 const Player = require("./models/Player");
 
-// Configuration constants
-const CONFIG = {
-  PORT: process.env.PORT || 5007,
-  SHIPS: {
-    carrier: { size: 5, count: 1 },
-    battleship: { size: 4, count: 1 },
-    cruiser: { size: 3, count: 1 },
-    destroyer: { size: 2, count: 1 },
-    submarine: { size: 1, count: 1 },
-  },
-  LETTERS: ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"],
-  GAME_STATES: {
-    INITIALIZING: "gameIsInitializing",
-    INITIALIZED: "gameInitialized",
-    SETTING_SHIPS: "setShipsRound",
-    RUNNING: "gameRunning",
-    OVER: "gameOver",
-  },
-};
-// Calculate total ship cells for victory condition
-const TOTAL_SHIP_CELLS = Object.values(CONFIG.SHIPS).reduce(
-  (sum, ship) => sum + ship.size * ship.count,
-  0
-);
+const generateUUID = () =>
+  Math.random().toString(36).substring(2) + Date.now().toString(36);
 
+// Games data - managed in-memory while server is running
+let games = {};
+// Get port from Heroku env-vars in production
+const PORT = process.env.PORT || 5007;
+// Init Express
+const app = express();
+
+// Init Express-Middleware
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
+
+// Configure API-Routes
+
+// Route gets called when list of available games is requested by client
+app.get("/games", (req, res) => {
+  if (!games) {
+    res.status(500).json({ statusCode: 500, msg: "Internal Server Error" });
+  } else {
+    // Filter out full games
+    const availGames = Object.values(games).filter(
+      (game) => !game.isGameFull() && game.isListed
+    );
+    console.log("Available games requested:", JSON.stringify(availGames));
+    console.log("All games currently live: ", JSON.stringify(games));
+    res.status(200).json(availGames);
+  }
+});
+
+// Route gets called when a player joins an existing game
+app.get("/games/join", (req, res) => {
+  const playerName = req.query["playerName"];
+  const playerId = req.query["playerId"];
+  const gameId = req.query.game;
+
+  const player = new Player(playerId, playerName);
+
+  if (!playerName || !gameId || !playerId) {
+    res.status(404).redirect("/");
+  } else if (games[gameId].isGameFull()) {
+    res.status(404).redirect("/");
+  } else if (games[gameId].isGameEmpty()) {
+    delete games[gameId];
+    res.status(404).redirect("/");
+  } else {
+    games[gameId].players.push(player);
+    res.redirect(
+      `/play.html?playerName=${playerName}&game=${gameId}&playerId=${playerId}`
+    );
+  }
+});
+
+// Route gets called when a new game is being created
+app.post("/games", (req, res) => {
+  if (!games) {
+    res.status(500).json({ statusCode: 500, msg: "Internal Server Error" });
+  } else if (!req.body["playerName"] || !req.body["playerId"]) {
+    res.status(500).json({
+      statusCode: 404,
+      msg: "Bad request! Please submit correct data!",
+    });
+  } else {
+    const playerName = req.body["playerName"];
+    const playerId = req.body["playerId"];
+    const player = new Player(playerId, playerName);
+
+    const gameId = generateUUID();
+    const game = new Game(gameId, `${playerName}'s Game`, [player]);
+    console.log("Created new game: ", JSON.stringify(game));
+
+    games = { ...games, [gameId]: game };
+    console.log("All games currently live: ", JSON.stringify(games));
+
+    res
+      .status(301)
+      .redirect(
+        `/play.html?playerName=${playerName}&game=${game.id}&playerId=${playerId}`
+      );
+  }
+});
+
+// Set Express Static-Folder
+app.use(express.static(path.resolve(__dirname, "www")));
+
+const server = app.listen(PORT, () => {
+  console.log(`Server is running on PORT ${PORT}`);
+});
+
+// Game helper functions
 const getInitialGridData = (width = 10, height = 10, initialCellValue = 0) => {
   const gridArray = [];
 
@@ -39,345 +105,375 @@ const getInitialGridData = (width = 10, height = 10, initialCellValue = 0) => {
   return gridArray;
 };
 
-const generateUUID = () =>
-  Math.random().toString(36).substring(2) + Date.now().toString(36);
+// Game states for simple state machine
+const gameStates = {
+  gameIsInitializing: "gameIsInitializing",
+  gameInitialized: "gameInitialized",
+  setShipsRound: "setShipsRound",
+  gameRunning: "gameRunning",
+  gameOver: "gameOver",
+};
 
-class GameServer {
-  constructor() {
-    this.games = {};
-    this.app = express();
-    this.setupExpress();
-    this.setupRoutes();
-    this.server = this.app.listen(CONFIG.PORT, () => {
-      console.log(`Server running on port ${CONFIG.PORT}`);
-    });
-    this.io = socketio(this.server);
-    this.setupSocketHandlers();
-  }
+const ships = {
+  carrier: { size: 5, count: 1 },
+  battleship: { size: 4, count: 1 },
+  cruiser: { size: 3, count: 1 },
+  destroyer: { size: 2, count: 1 },
+  submarine: { size: 1, count: 1 },
+};
 
-  setupExpress() {
-    this.app.use(express.urlencoded({ extended: false }));
-    this.app.use(express.json());
-    this.app.use(express.static(path.resolve(__dirname, "www")));
-  }
+// Calculate total ship cells (used for victory condition)
+const totalShipCells = Object.values(ships).reduce(
+  (sum, ship) => sum + ship.size * ship.count,
+  0
+);
 
-  setupRoutes() {
-    this.app.get("/games", (req, res) => {
-      try {
-        const availableGames = Object.values(this.games).filter(
-          (game) => !game.isGameFull() && game.isListed
-        );
-        res.status(200).json(availableGames);
-      } catch (error) {
-        console.error("Error fetching games:", error);
-        res.status(500).json({ error: "Internal Server Error" });
-      }
-    });
+// Letter for array-number lookup
+const letters = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"];
 
-    this.app.get("/games/join", (req, res) => {
-      try {
-        const { playerName, playerId, game: gameId } = req.query;
+// Socket.io Stuff
+const io = socketio(server);
 
-        if (!playerName || !gameId || !playerId) {
-          return res.status(400).redirect("/");
-        }
+io.on("connection", (socket) => {
+  // The state for this individual session = player
+  const state = {
+    gameId: null,
+    playerId: null,
+    playerName: "",
+    otherPlayerGrid: getInitialGridData(),
+  };
 
-        const game = this.games[gameId];
-        if (!game) {
-          return res.status(404).redirect("/");
-        }
+  let thisGame;
 
-        if (game.isGameFull()) {
-          return res.status(409).redirect("/");
-        }
+  socket.on("joinGame", ({ gameId, playerId, playerName }) => {
+    // Set state variables for this connection
+    state.gameId = gameId;
+    state.playerName = playerName;
+    state.playerId = playerId;
 
-        if (game.isGameEmpty()) {
-          delete this.games[gameId];
-          return res.status(404).redirect("/");
-        }
+    // Join game / room
+    socket.join(state.gameId);
 
-        const player = new Player(playerId, playerName);
-        game.players.push(player);
+    thisGame = games[state.gameId];
 
-        res.redirect(
-          `/play.html?playerName=${playerName}&game=${gameId}&playerId=${playerId}`
-        );
-      } catch (error) {
-        console.error("Error joining game:", error);
-        res.status(500).redirect("/");
-      }
-    });
+    // Initialize grid data for this player
+    thisGame[`${state.playerId}_grid`] = getInitialGridData();
+    thisGame[`${state.playerId}_shipsPlaced`] = 0;
+    thisGame[`${state.playerId}_shipCellsPlaced`] = 0;
+    thisGame[`${state.playerId}_shipsLost`] = 0;
+    thisGame[`${state.playerId}_shipHits`] = {
+      carrier: 0,
+      battleship: 0,
+      cruiser: 0,
+      destroyer: 0,
+      submarine: 0,
+    };
+    thisGame[`${state.playerId}_placedShips`] = {
+      carrier: false,
+      battleship: false,
+      cruiser: false,
+      destroyer: false,
+      submarine: false,
+    };
 
-    this.app.post("/games", (req, res) => {
-      try {
-        const { playerName, playerId } = req.body;
+    // Change game state to "initialized"
+    thisGame.gameState = gameStates.gameInitialized;
+    socket.emit("changeGameState", thisGame.gameState);
+    socket.emit("message", "Welcome to the game!");
 
-        if (!playerName || !playerId) {
-          return res.status(400).json({ error: "Missing required fields" });
-        }
+    // Broadcast to other player that another player has joined
+    socket.broadcast
+      .to(state.gameId)
+      .emit("message", `${state.playerName} has joined the game.`);
 
-        const player = new Player(playerId, playerName);
-        const gameId = generateUUID();
-        const game = new Game(gameId, `${playerName}'s Game`, [player]);
+    // Check number of players, as soon as both players are there => game can start
+    if (thisGame.players.length <= 1) {
+      socket.emit("message", "Waiting for other players to join...");
+    } else if (thisGame.players.length >= 2) {
+      // Unlist game from lobby as soon as a second player joins
+      thisGame.isListed = false;
 
-        this.games[gameId] = game;
-
-        res
-          .status(301)
-          .redirect(
-            `/play.html?playerName=${playerName}&game=${gameId}&playerId=${playerId}`
-          );
-      } catch (error) {
-        console.error("Error creating game:", error);
-        res.status(500).json({ error: "Internal Server Error" });
-      }
-    });
-  }
-
-  initializePlayerState(game, playerId) {
-    game[`${playerId}_grid`] = getInitialGridData();
-    game[`${playerId}_shipsPlaced`] = 0;
-    game[`${playerId}_shipCellsPlaced`] = 0;
-    game[`${playerId}_shipsLost`] = 0;
-    game[`${playerId}_shipHits`] = Object.fromEntries(
-      Object.keys(CONFIG.SHIPS).map((ship) => [ship, 0])
-    );
-    game[`${playerId}_placedShips`] = Object.fromEntries(
-      Object.keys(CONFIG.SHIPS).map((ship) => [ship, false])
-    );
-  }
-
-  handleShipPlacement(socket, game, playerId, x, y, shipType, isVertical) {
-    if (!CONFIG.SHIPS[shipType]) {
-      socket.emit("message", "Invalid ship type selected!");
-      return false;
-    }
-
-    if (game[`${playerId}_placedShips`][shipType]) {
-      socket.emit("message", `You've already placed your ${shipType}!`);
-      return false;
-    }
-
-    const size = CONFIG.SHIPS[shipType].size;
-    const grid = game[`${playerId}_grid`];
-
-    if (isVertical && y + size > 10) {
-      socket.emit(
+      thisGame.gameState = gameStates.setShipsRound;
+      io.to(state.gameId).emit("changeGameState", thisGame.gameState);
+      io.to(state.gameId).emit(
         "message",
-        "Ship would go out of bounds! Try another position."
+        "The game has started! Place your ships!"
       );
-      return false;
     }
+  });
 
-    if (!isVertical && x + size > 10) {
-      socket.emit(
-        "message",
-        "Ship would go out of bounds! Try another position."
-      );
-      return false;
-    }
+  socket.on("clickOnEnemyGrid", ({ x, y }) => {
+    if (thisGame.gameState === gameStates.gameRunning) {
+      y = letters.indexOf(y);
 
-    // check for overlapping ships
-    for (let i = 0; i < size; i++) {
-      const checkY = isVertical ? y + i : y;
-      const checkX = isVertical ? x : x + i;
-      if (grid[checkY][checkX] === 1) {
+      const otherPlayerId = thisGame.players.filter((player) => {
+        return player.id !== state.playerId;
+      })[0].id;
+      const currentCellValue = thisGame[`${otherPlayerId}_grid`][y][x];
+
+      if (currentCellValue === 2 || currentCellValue === 3) {
         socket.emit(
           "message",
-          "Invalid placement! Ship would overlap with another ship."
+          `You already hit that spot! Click on another one`
         );
-        return false;
+        return;
       }
-    }
 
-    for (let i = 0; i < size; i++) {
-      const placeY = isVertical ? y + i : y;
-      const placeX = isVertical ? x : x + i;
-      grid[placeY][placeX] = 1;
-    }
-
-    game[`${playerId}_shipCellsPlaced`] += size;
-    game[`${playerId}_shipsPlaced`]++;
-    game[`${playerId}_placedShips`][shipType] = true;
-
-    return true;
-  }
-
-  handleAttack(socket, game, attackerId, targetId, x, y) {
-    const targetGrid = game[`${targetId}_grid`];
-    const currentCell = targetGrid[y][x];
-
-    if (currentCell === 2 || currentCell === 3) {
-      socket.emit("message", "You already hit that spot! Try another one.");
-      return false;
-    }
-
-    if (currentCell === 0) {
-      // Miss
-      targetGrid[y][x] = 2;
-      socket.emit("message", "You hit water!");
-      socket.broadcast.to(game.id).emit("message", "The enemy missed!");
-    } else if (currentCell === 1) {
-      // Hit
-      targetGrid[y][x] = 3;
-      game[`${targetId}_shipsLost`]++;
-      socket.emit("message", "Direct hit on enemy ship!");
-      socket.broadcast.to(game.id).emit("message", "Your ship was hit!");
-
-      if (game[`${targetId}_shipsLost`] >= TOTAL_SHIP_CELLS) {
-        game.gameState = CONFIG.GAME_STATES.OVER;
-        this.io.to(game.id).emit("changeGameState", game.gameState);
-        socket.emit("message", "Victory! You've destroyed all enemy ships!");
+      if (currentCellValue === 0) {
+        thisGame[`${otherPlayerId}_grid`][y][x] = 2;
+        state.otherPlayerGrid[y][x] = 2;
+        socket.emit("message", `You hit water!`);
         socket.broadcast
-          .to(game.id)
-          .emit("message", "Defeat! All your ships are destroyed!");
-        return true;
-      }
-    }
+          .to(state.gameId)
+          .emit("message", `The other player hit nothing!`);
+      } else if (currentCellValue === 1) {
+        thisGame[`${otherPlayerId}_grid`][y][x] = 3;
+        state.otherPlayerGrid[y][x] = 3;
+        thisGame[`${otherPlayerId}_shipsLost`]++;
 
-    return true;
-  }
+        // Track hits and check for sunk ships
+        let shipSunk = false;
+        let sunkShipType = "";
 
-  setupSocketHandlers() {
-    this.io.on("connection", (socket) => {
-      const state = {
-        gameId: null,
-        playerId: null,
-        playerName: "",
-        otherPlayerGrid: getInitialGridData(),
-      };
-
-      socket.on("joinGame", ({ gameId, playerId, playerName }) => {
-        state.gameId = gameId;
-        state.playerName = playerName;
-        state.playerId = playerId;
-
-        socket.join(gameId);
-        const game = this.games[gameId];
-
-        this.initializePlayerState(game, playerId);
-
-        if (game.players.length === 1) {
-          socket.emit("message", "Waiting for opponent to join...");
-        } else if (game.players.length === 2) {
-          game.isListed = false;
-          game.gameState = CONFIG.GAME_STATES.SETTING_SHIPS;
-          this.io.to(gameId).emit("changeGameState", game.gameState);
-          this.io.to(gameId).emit("message", "Game started! Place your ships!");
-        }
-      });
-
-      socket.on("clickOnFriendlyGrid", ({ x, y, shipType, isVertical }) => {
-        const game = this.games[state.gameId];
-        if (game.gameState === CONFIG.GAME_STATES.SETTING_SHIPS) {
-          y = CONFIG.LETTERS.indexOf(y);
-          if (
-            this.handleShipPlacement(
-              socket,
-              game,
-              state.playerId,
-              x,
-              y,
-              shipType,
-              isVertical
-            )
-          ) {
-            socket.emit("shipPlaced", { shipType });
-            socket.emit("updateGrid", {
-              gridToUpdate: "friendlyGrid",
-              data: game[`${state.playerId}_grid`],
-            });
-
-            // Check if all ships are placed
-            const allShipsPlaced = game.players.every(
-              (player) =>
-                game[`${player.id}_shipsPlaced`] ===
-                Object.keys(CONFIG.SHIPS).length
-            );
-
-            if (allShipsPlaced) {
-              game.gameState = CONFIG.GAME_STATES.RUNNING;
-              this.io.to(game.id).emit("changeGameState", game.gameState);
-              this.io
-                .to(game.id)
-                .emit("message", "All ships placed! Battle begins!");
-              this.io.to(game.id).emit("nextRound");
-
-              // Randomly choose who goes first
-              const firstPlayer =
-                Math.random() < 0.5 ? game.players[0] : game.players[1];
-              this.io
-                .to(game.id)
-                .emit("yourTurn", socket.id === firstPlayer.id);
+        // Determine which ship was hit by counting consecutive hits
+        Object.entries(ships).forEach(([shipType, shipInfo]) => {
+          let consecutiveHits = 0;
+          // Check horizontal
+          for (let i = Math.max(0, x - shipInfo.size + 1); i <= x; i++) {
+            let isValid = true;
+            for (let j = 0; j < shipInfo.size && isValid; j++) {
+              if (
+                i + j >= 10 ||
+                thisGame[`${otherPlayerId}_grid`][y][i + j] !== 3
+              ) {
+                isValid = false;
+              }
+            }
+            if (isValid) {
+              thisGame[`${otherPlayerId}_shipHits`][shipType]++;
+              if (
+                thisGame[`${otherPlayerId}_shipHits`][shipType] ===
+                shipInfo.size
+              ) {
+                shipSunk = true;
+                sunkShipType = shipType;
+              }
+              break;
             }
           }
-        }
-      });
+        });
 
-      socket.on("clickOnEnemyGrid", ({ x, y }) => {
-        const game = this.games[state.gameId];
-        if (game.gameState === CONFIG.GAME_STATES.RUNNING) {
-          y = CONFIG.LETTERS.indexOf(y);
-          const targetPlayer = game.players.find(
-            (p) => p.id !== state.playerId
-          );
-
-          if (
-            this.handleAttack(
-              socket,
-              game,
-              state.playerId,
-              targetPlayer.id,
-              x,
-              y
-            )
-          ) {
-            socket.emit("updateGrid", {
-              gridToUpdate: "enemyGrid",
-              data: state.otherPlayerGrid,
-            });
-            socket.broadcast.to(game.id).emit("updateGrid", {
-              gridToUpdate: "friendlyGrid",
-              data: game[`${targetPlayer.id}_grid`],
-            });
-
-            this.io.to(game.id).emit("nextRound");
-            socket.emit("yourTurn", false);
-            socket.broadcast.to(game.id).emit("yourTurn", true);
-          }
-        }
-      });
-
-      socket.on("chatMessage", ({ playerName, message }) => {
-        this.io.to(state.gameId).emit("chatMessage", { playerName, message });
-      });
-
-      socket.on("disconnect", () => {
-        if (state.gameId && this.games[state.gameId]) {
-          const game = this.games[state.gameId];
-
-          this.io
+        if (shipSunk) {
+          socket.emit("message", `You sunk the enemy's ${sunkShipType}!`);
+          socket.broadcast
             .to(state.gameId)
-            .emit("message", `${state.playerName} has left the game.`);
-
-          game.players = game.players.filter((p) => p.id !== state.playerId);
-          game.gameState = CONFIG.GAME_STATES.OVER;
-
-          this.io.to(state.gameId).emit("changeGameState", game.gameState);
-          this.io
+            .emit("message", `The enemy sunk your ${sunkShipType}!`);
+        } else {
+          socket.emit(
+            "message",
+            `You hit one of the other players' ships! Nice!`
+          );
+          socket.broadcast
             .to(state.gameId)
             .emit(
               "message",
-              "Game over - opponent disconnected. Returning to main menu in 10 seconds..."
+              `Oh noes! The other player hit one of your ships!`
             );
+        }
 
-          if (game.players.length === 0) {
-            delete this.games[state.gameId];
+        // Check for game over
+        if (thisGame[`${otherPlayerId}_shipsLost`] >= totalShipCells) {
+          socket.emit("updateGrid", {
+            gridToUpdate: "enemyGrid",
+            data: state.otherPlayerGrid,
+          });
+          socket.broadcast.to(state.gameId).emit("updateGrid", {
+            gridToUpdate: "friendlyGrid",
+            data: thisGame[`${otherPlayerId}_grid`],
+          });
+
+          thisGame.gameState = gameStates.gameOver;
+          io.to(state.gameId).emit("changeGameState", thisGame.gameState);
+
+          // Enhanced victory messages
+          socket.emit(
+            "message",
+            `Congratulations! You've won the game by destroying all enemy ships!`
+          );
+          socket.broadcast
+            .to(state.gameId)
+            .emit("message", `Game Over - All your ships have been destroyed!`);
+          io.to(state.gameId).emit(
+            "message",
+            `${state.playerName} won! Returning to main menu in 10 seconds...`
+          );
+          return;
+        }
+      }
+
+      socket.emit("updateGrid", {
+        gridToUpdate: "enemyGrid",
+        data: state.otherPlayerGrid,
+      });
+      socket.broadcast.to(state.gameId).emit("updateGrid", {
+        gridToUpdate: "friendlyGrid",
+        data: thisGame[`${otherPlayerId}_grid`],
+      });
+
+      io.to(state.gameId).emit("nextRound");
+      socket.emit("yourTurn", false);
+      socket.broadcast.to(state.gameId).emit("yourTurn", true);
+    }
+  });
+
+  socket.on("clickOnFriendlyGrid", ({ x, y, shipType, isVertical }) => {
+    if (thisGame.gameState === gameStates.setShipsRound) {
+      y = letters.indexOf(y);
+
+      // Validate ship selection
+      if (!ships[shipType]) {
+        socket.emit("message", "Invalid ship type selected!");
+        return;
+      }
+
+      // Check if this ship type was already placed
+      if (thisGame[`${state.playerId}_placedShips`][shipType]) {
+        socket.emit("message", `You've already placed your ${shipType}!`);
+        return;
+      }
+
+      const size = ships[shipType].size;
+
+      // Check if placement is valid (all cells are empty)
+      let canPlace = true;
+      if (isVertical) {
+        // Check vertical placement
+        if (y + size > 10) {
+          socket.emit(
+            "message",
+            "Ship would go out of bounds! Try another position."
+          );
+          return;
+        }
+
+        for (let i = 0; i < size; i++) {
+          if (thisGame[`${state.playerId}_grid`][y + i][x] === 1) {
+            canPlace = false;
+            break;
           }
         }
-      });
-    });
-  }
-}
+      } else {
+        // Check horizontal placement
+        if (x + size > 10) {
+          socket.emit(
+            "message",
+            "Ship would go out of bounds! Try another position."
+          );
+          return;
+        }
 
-new GameServer();
+        for (let i = 0; i < size; i++) {
+          if (thisGame[`${state.playerId}_grid`][y][x + i] === 1) {
+            canPlace = false;
+            break;
+          }
+        }
+      }
+
+      if (canPlace) {
+        // Place the ship
+        if (isVertical) {
+          for (let i = 0; i < size; i++) {
+            thisGame[`${state.playerId}_grid`][y + i][x] = 1;
+          }
+        } else {
+          for (let i = 0; i < size; i++) {
+            thisGame[`${state.playerId}_grid`][y][x + i] = 1;
+          }
+        }
+
+        thisGame[`${state.playerId}_shipCellsPlaced`] += size;
+        thisGame[`${state.playerId}_shipsPlaced`]++;
+
+        // Emit the shipPlaced event
+        socket.emit("shipPlaced", { shipType });
+
+        socket.emit(
+          "message",
+          `Ship placed! ${
+            Object.keys(ships).length -
+            thisGame[`${state.playerId}_shipsPlaced`]
+          } ships to go.`
+        );
+        socket.emit("updateGrid", {
+          gridToUpdate: "friendlyGrid",
+          data: thisGame[`${state.playerId}_grid`],
+        });
+
+        // Check if all ships are placed for both players
+        if (
+          thisGame[`${thisGame.players[0].id}_shipsPlaced`] ===
+            Object.keys(ships).length &&
+          thisGame[`${thisGame.players[1].id}_shipsPlaced`] ===
+            Object.keys(ships).length
+        ) {
+          thisGame.gameState = gameStates.gameRunning;
+          io.to(state.gameId).emit("changeGameState", thisGame.gameState);
+          io.to(state.gameId).emit(
+            "message",
+            "All ships are placed! Let the fighting begin!"
+          );
+          io.to(state.gameId).emit("nextRound");
+
+          socket.emit("yourTurn", false);
+          socket.broadcast.to(state.gameId).emit("yourTurn", true);
+        }
+      } else {
+        socket.emit(
+          "message",
+          "Invalid placement! Ship would overlap with another ship. Try another position."
+        );
+      }
+    }
+  });
+
+  // Handle chat messages between players
+  socket.on("chatMessage", ({ playerName, message }) => {
+    io.to(state.gameId).emit("chatMessage", {
+      playerName,
+      message,
+    });
+  });
+
+  // Send messages when a player leaves the game
+  socket.on("disconnect", () => {
+    io.to(state.gameId).emit(
+      "message",
+      `${state.playerName} has left the game.`
+    );
+
+    // Cleanup when one or both players leave => delete game from memory when both left
+    if (thisGame)
+      thisGame.players = thisGame.players.filter(
+        (player) => player.id !== state.playerId
+      );
+
+    // Change game-state to gameover - inform player about his win
+    if (thisGame) {
+      thisGame.gameState = gameStates.gameOver;
+      io.to(state.gameId).emit("changeGameState", thisGame.gameState);
+
+      io.to(state.gameId).emit(
+        "message",
+        "Congrats! You won as the other player has left the game! You will be automatically loaded to the main menu in 10 seconds..."
+      );
+    }
+
+    if (thisGame && thisGame.players && thisGame.players.length === 0) {
+      thisGame = null;
+      delete games[state.gameId];
+    }
+
+    socket.disconnect();
+  });
+});
