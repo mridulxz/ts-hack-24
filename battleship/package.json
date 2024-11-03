@@ -1,10 +1,10 @@
 {
   "name": "battleship",
   "version": "1.0.0",
-  "main": "server.js",
+  "main": "server/index.js",
   "scripts": {
-    "start": "node .",
-    "dev": "nodemon ."
+    "start": "node server/index.js",
+    "dev": "nodemon server/index.js"
   },
   "devDependencies": {
     "nodemon": "^2.0.4"

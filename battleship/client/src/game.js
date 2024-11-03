@@ -129,7 +129,7 @@ class BattleshipGame {
     this.setupEventListeners();
 
     // Clean up URL
-    window.history.replaceState({}, document.title, "/play.html");
+    window.history.replaceState({}, document.title, "/play");
 
     // Show initial message
     this.addConsoleMessage(this.MESSAGES.INITIALIZING);
