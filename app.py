@@ -70,8 +70,7 @@ def load_user(user_id):
 
 @app.route("/")
 def index():
-    # return render_template("index.html")
-    return redirect(url_for("login"))
+    return render_template("index.html")
 
 
 @app.route("/logout")
