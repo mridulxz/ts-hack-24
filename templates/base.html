@@ -4,14 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="/static/css/output.css" rel="stylesheet">
+    <link rel="preload" href="/static/fonts/GeneralSans-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/static/fonts/GeneralSans-Medium.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/static/fonts/GeneralSans-Semibold.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="prefetch" as="image" href="/static/ship.png">
+    <link rel="prefetch" as="image" href="/static/dice{{ dice_num }}.png">
+    <link href="/static/css/general-sans.css" rel="stylesheet">
     <title>The Bored Games</title>
 </head>
 <body class="w-full h-full overflow-hidden bg-[#201F1F]">
 
-<div class="glow absolute -bottom-[400px] -right-[400px] w-[2500px] h-[600px] rounded-[92rem] bg-gradient-to-t from-[rgba(14,226,110,0.25)] to-[rgba(41,225,219,0.25)] rotate-[142deg] z-0 blur-[100px]"></div>
+<div class="glow absolute -bottom-[400px] -right-[400px] w-[2500px] h-[600px] rounded-[92rem] bg-gradient-to-t from-[rgba(14,226,110,0.25)] to-[rgba(41,225,219,0.25)] rotate-[150deg] z-0 blur-[100px]"></div>
 
 <a href="/" class="absolute top-0 left-0">
-    <img class="p-10" src="/static/logo.png" />
+    <img class="p-10 pointer-events-none" src="/static/logo.png" />
 </a>
 
   {% macro nav_item(href, text, current) %}
@@ -26,7 +32,7 @@
       {{ nav_item('/', 'Home', 'home') }}
       {{ nav_item('/careers', 'Careers', 'careers') }}
       <div class="relative w-[103px] h-[90px]">
-        <img class="absolute -top-4 -bottom-4 left-0 w-[103px] h-[110px]" 
+        <img class="absolute -top-4 -bottom-4 left-0 pointer-events-none" 
              src="/static/dice{{ dice_num }}.png" alt="Dice">
       </div>
       {{ nav_item('/about', 'About', 'about') }}
