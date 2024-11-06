@@ -1,6 +1,6 @@
 # robotronics-24
 
-> The website is already deployed and live at [CHANGEME.rex.wf](https://CHANGEME.rex.wf/)!
+> The website is already deployed and live at [tbg.rex.wf](https://tbg.rex.wf/)!
 
 ## Local Deployment Guide
 
@@ -21,6 +21,7 @@ git clone https://github.com/rex69420/ts-hack-24.git
 Navigate into the project directory and execute one of the following commands based on your operating system:
 
 - **For Windows:**
+
   ```bash
   run.bat
   ```
