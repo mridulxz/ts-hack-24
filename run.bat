@@ -46,7 +46,7 @@ echo First launch flag > .flag
 
 :launch_app
 rem Launch app.py and bun run dev
-start cmd /k python app.py
+start cmd /k flask --debug run
 start cmd /k bun run dev
 
 endlocal

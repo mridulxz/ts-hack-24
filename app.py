@@ -78,14 +78,14 @@ def careers():
     return render_template("careers.html", active_page="careers", dice_num=2)
 
 
-@app.route("/about")
-def about():
-    return render_template("base.html", active_page="about", dice_num=3)
+@app.route("/shop")
+def shop():
+    return render_template("shop.html", active_page="shop", dice_num=3)
 
 
 @app.route("/contact")
 def contact():
-    return render_template("base.html", active_page="contact", dice_num=4)
+    return render_template("contact.html", active_page="contact", dice_num=4)
 
 
 @app.route("/logout")

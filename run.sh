@@ -44,8 +44,8 @@ if [ "$1" == "prod" ]; then
     echo "Running in production mode"
     flask run &
 else
-    echo "Running python3 app.py"
-    python3 app.py &
+    echo "Running in dev mode"
+    flask --debug run &
 fi
 
 bun run build &
