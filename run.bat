@@ -14,10 +14,10 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-rem Check if npm is in path
-where npm >nul 2>&1
+rem Check if bun is in path
+where bun >nul 2>&1
 if %errorlevel% neq 0 (
-    echo npm is not installed. Please install it using:
+    echo bun is not installed. Please install it using:
     echo winget install OpenJS.NodeJS
     exit /b 1
 )
@@ -38,15 +38,15 @@ if /i "%install_deps%"=="yes" (
     pip install -r requirements.txt
 
     rem Install Node.js dependencies
-    npm install -D tailwindcss
+    bun install -D tailwindcss
 )
 
 rem Create .flag file to indicate first launch
 echo First launch flag > .flag
 
 :launch_app
-rem Launch app.py and npm run dev
+rem Launch app.py and bun run dev
 start cmd /k python app.py
-start cmd /k npm run dev
+start cmd /k bun run dev
 
 endlocal

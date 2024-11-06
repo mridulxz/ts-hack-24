@@ -3,7 +3,7 @@ import secrets
 from urllib.parse import urlencode
 
 import requests
-from bson.objectid import ObjectId
+from bson import ObjectId
 from dotenv import load_dotenv
 from flask import (
     Flask,
@@ -69,8 +69,23 @@ def load_user(user_id):
 
 
 @app.route("/")
-def index():
-    return render_template("index.html")
+def home():
+    return render_template("index.html", active_page="home", dice_num=1)
+
+
+@app.route("/careers")
+def careers():
+    return render_template("careers.html", active_page="careers", dice_num=2)
+
+
+@app.route("/about")
+def about():
+    return render_template("base.html", active_page="about", dice_num=3)
+
+
+@app.route("/contact")
+def contact():
+    return render_template("base.html", active_page="contact", dice_num=4)
 
 
 @app.route("/logout")

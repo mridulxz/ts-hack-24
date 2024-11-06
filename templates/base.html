@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="/static/css/output.css" rel="stylesheet">
+    <title>The Bored Games</title>
+</head>
+<body class="w-full h-full overflow-hidden bg-[#201F1F]">
+
+<div class="glow absolute -bottom-[400px] -right-[400px] w-[2500px] h-[600px] rounded-[92rem] bg-gradient-to-t from-[rgba(14,226,110,0.25)] to-[rgba(41,225,219,0.25)] rotate-[142deg] z-0 blur-[100px]"></div>
+
+<a href="/" class="absolute top-0 left-0">
+    <img class="p-10" src="/static/logo.png" />
+</a>
+
+  {% macro nav_item(href, text, current) %}
+      <a href="{{ href }}" 
+         class="text-[35px] font-['GeneralSans-Medium'] {% if active_page == current %}text-[#0ee26e] border-b-2 border-[#ececec] mb-1{% else %}text-[#ececec]{% endif %}">
+          {{ text }}
+      </a>
+  {% endmacro %}
+
+  <div class="flex justify-center w-full mt-8">
+    <div class="flex items-center justify-center gap-[120px] bg-[#262626] rounded-full px-24 h-20 shadow-[0_2px_3px_rgba(0,0,0,1)] relative">
+      {{ nav_item('/', 'Home', 'home') }}
+      {{ nav_item('/careers', 'Careers', 'careers') }}
+      <div class="relative w-[103px] h-[90px]">
+        <img class="absolute -top-4 -bottom-4 left-0 w-[103px] h-[110px]" 
+             src="/static/dice{{ dice_num }}.png" alt="Dice">
+      </div>
+      {{ nav_item('/about', 'About', 'about') }}
+      {{ nav_item('/contact', 'Contact', 'contact') }}
+    </div>
+  </div>
+
+  {% block content %}{% endblock %}
+
+</body>
+</html>

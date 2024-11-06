@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Function to trap Ctrl+C and kill both Python and npm processes
+# Function to trap Ctrl+C and kill both Python and bun processes
 trap 'kill $(jobs -p); echo "Exiting..."; exit' INT
 
 # Check if pip is installed
@@ -10,10 +10,10 @@ if ! command -v pip &> /dev/null; then
     exit 1
 fi
 
-# Check if npm is installed
-if ! command -v npm &> /dev/null; then
-    echo "npm is not installed. Please install it using:"
-    echo "sudo apt install npm"
+# Check if bun is installed
+if ! command -v bun &> /dev/null; then
+    echo "bun is not installed. Please install it using:"
+    echo "sudo apt install bun"
     exit 1
 fi
 
@@ -32,7 +32,7 @@ if ! [ -f .flag ]; then
         pip install -r requirements.txt
 
         # Install Node.js dependencies
-        npm install -D tailwindcss
+        bun install -D tailwindcss
     fi
 
     echo "First launch flag" > .flag
@@ -48,6 +48,6 @@ else
     python3 app.py &
 fi
 
-npm run build &
+bun run build &
 
 wait
