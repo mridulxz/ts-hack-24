@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Join Game - Battleship</title>
+    <link rel="stylesheet" href="./css/normalize.min.css" />
+    <link rel="stylesheet" href="./css/skeleton.min.css" />
+    <link rel="stylesheet" href="./css/style.css" />
+  </head>
+
+  <body>
+    <div class="background">
+      <div class="background-overlay">
+        <header class="header">
+          <div class="logo">
+            <a href="/">
+              <img src="./assets/img/battleship.svg" alt="Battleship" />
+              <h1 class="text-center">
+                Battle
+                <span style="color: antiquewhite">ship!</span>
+              </h1>
+            </a>
+          </div>
+        </header>
+        <main>
+          <div id="game">
+            <div class="panels">
+              <div class="panel main-menu">
+                <div class="tab" id="join-tab">
+                  <h5 class="text-center">
+                    <strong>Join Game</strong>
+                  </h5>
+                  <form id="join-form" action="/games/join" method="get">
+                    <label for="player-name">Your Player Name:</label>
+                    <input
+                      type="text"
+                      name="playerName"
+                      class="u-full-width player-name"
+                      required />
+                    <label for="game">Currently Available Games:</label>
+                    <select
+                      name="game"
+                      id="games-list"
+                      class="u-full-width"
+                      required></select>
+                    <button type="submit" class="button button-primary">
+                      Join Game
+                    </button>
+                    <button class="button secondary-btn" id="refresh-games-btn">
+                      Refresh Games List
+                    </button>
+                  </form>
+                  <br />
+                  <a href="/" class="button">Back to Main Menu</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <script src="../src/main.js"></script>
+  </body>
+</html>
