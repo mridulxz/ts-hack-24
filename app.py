@@ -22,7 +22,7 @@ def shop():
 
 
 @app.route("/about")
-def contact():
+def about():
     return render_template("about.html", active_page="about", dice_num=4)
 
 
