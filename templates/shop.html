@@ -1,0 +1,48 @@
+{% extends "base.html" %} {% block content %}
+
+<div class="relative">
+    <div class="text-center text-[#ececec] text-6xl font-['GeneralSans-Semibold'] mt-12 relative z-10">
+        Shop
+    </div>
+
+    <img src="/static/shop_ship.png" class="mx-auto mt-20 relative z-10" alt="shop_ship">
+
+    <div class="w-full h-full px-20 py-20 justify-between items-center inline-flex relative z-10">
+
+        <div class="flex-col justify-between items-start inline-flex">
+            <div class="text-[#099147] text-xl font-medium font-['Inter'] leading-none">Model</div>
+            <div class="text-[#e0e0e0] text-5xl font-medium font-['Inter'] leading-[50px] mt-1">Italian Class <br/>Battleship<br/>1959</div>
+        </div>
+
+        <div class="flex-col justify-center items-center gap-[15px] inline-flex ml-32">
+            <div class="w-[200px] justify-between items-center inline-flex">
+                <div class="w-10 h-10 bg-[#3b362b] rounded-full"></div>
+                <div class="w-10 h-10 bg-[#9aa3a9] rounded-full"></div>
+                <div class="w-10 h-10 bg-[#5d6d75] rounded-full"></div>
+            </div>
+                <div class="text-center">
+                    <span class="text-[#303030] text-[25px] font-medium font-['Inter'] leading-tight">Size: 22</span>
+                    <span class="text-[#303030] text-[15px] font-medium font-['Inter'] lowercase leading-3">cm</span>
+                    <span class="text-[#303030] text-[25px] font-medium font-['Inter'] leading-tight">x3</span>
+                    <span class="text-[#303030] text-[15px] font-medium font-['Inter'] lowercase leading-3">cm</span>
+                    <span class="text-[#303030] text-[25px] font-medium font-['Inter'] leading-tight">x6</span>
+                    <span class="text-[#303030] text-[15px] font-medium font-['Inter'] lowercase leading-3">cm</span>
+                    <span class="text-[#303030] text-[25px] font-medium font-['Inter'] leading-tight">  </span>
+                </div>
+        </div>
+        
+        <div class="w-[400px] h-[140px] flex-col justify-between items-end inline-flex">
+            <div class="text-right text-[#7f7f7f] text-2xl font-light font-['Inter'] leading-tight tracking-wide">Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit.</div>
+            
+            <a href="#">
+            <div class="w-[200px] h-12 relative mt-2">
+                <div class="w-full h-12 left-0 top-0 absolute rounded-[25px] border-2 border-[#7f7f7f]"></div>
+                <div class="left-[35px] top-[9px] absolute text-[#e0e0e0] text-[25px] font-normal font-['Inter'] leading-tight">Place Order</div>
+            </div>
+            </a>
+        </div>
+    </div>
+    <div class="bg-[#191818] fixed bottom-0 left-0 right-0 w-full h-80 -z-10"></div>
+</div>
+
+{% endblock %}

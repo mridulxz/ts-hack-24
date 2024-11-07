@@ -11,14 +11,14 @@ def home():
     return render_template("index.html", active_page="home", dice_num=1)
 
 
-@app.route("/careers")
-def careers():
-    return render_template("careers.html", active_page="careers", dice_num=2)
-
-
 @app.route("/shop")
 def shop():
-    return render_template("shop.html", active_page="shop", dice_num=3)
+    return render_template("shop.html", active_page="shop", dice_num=2)
+
+
+@app.route("/careers")
+def careers():
+    return render_template("careers.html", active_page="careers", dice_num=3)
 
 
 @app.route("/about")
