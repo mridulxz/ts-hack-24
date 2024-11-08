@@ -3,85 +3,58 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
     <title>Battleship</title>
-    <meta
-      name="description"
-      content="A multiplayer variant of the famous 'Battleship'-game, made by The Board Games." />
-    <link rel="stylesheet" href="./css/normalize.min.css" />
-    <link rel="stylesheet" href="./css/skeleton.min.css" />
-    <link rel="stylesheet" href="./css/style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&family=Fira+Mono:wght@400;500;700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet" />
   </head>
+  <body class="w-full h-screen overflow-hidden relative">
+    <div
+      class="absolute inset-0 w-full h-full bg-[url('/assets/img/bg.png')] bg-center bg-cover bg-no-repeat z-0"></div>
 
-  <body>
-    <div class="background">
-      <div class="background-overlay">
-        <header class="header">
-          <div class="logo">
-            <a href="/">
-              <img src="./assets/img/battleship.svg" alt="Battleship" />
-              <h1 class="text-center">
-                Battle
-                <span style="color: antiquewhite">ship!</span>
-              </h1>
-            </a>
-          </div>
-        </header>
-        <main>
-          <div id="game">
-            <div class="panels">
-              <div class="panel main-menu">
-                <div class="tab" id="main-tab">
-                  <h5 class="text-center"><strong>Main Menu</strong></h5>
-                  <button
-                    class="button-primary tab-trigger"
-                    id="create-btn"
-                    data-targets="create">
-                    Create New Game
-                  </button>
-                  <button
-                    class="button-primary tab-trigger"
-                    id="join-btn"
-                    data-targets="join">
-                    Join Existing Game
-                  </button>
-                  <button
-                    class="button tab-trigger"
-                    id="show-rules-btn"
-                    data-targets="rules">
-                    Show Rules
-                  </button>
-                  <button
-                    class="button tab-trigger"
-                    id="show-credits-btn"
-                    data-targets="credits">
-                    Show Credits
-                  </button>
-                  <br />
-                  <h6 class="text-center"><strong>Options</strong></h6>
-                  <button class="button secondary-btn" id="toggle-music-btn">
-                    Toggle Music
-                  </button>
-                  <button class="button secondary-btn" id="toggle-sound-btn">
-                    Toggle Sound
-                  </button>
-                  <button class="button secondary-btn" id="toggle-fullscreen-btn">
-                    Toggle Fullscreen
-                  </button>
-                  <br />
-                  <p class="text-center">
-                    Made with
-                    <span style="color: #e25555;">&#9829;</span>
-                    by
-                    <a href="https://theboredgames.rex.wf">The Bored Games</a>
-                  </p>
-                </div>
-              </div>
+    <a href="https://tbg.rex.wf" class="absolute top-0 left-0 z-10">
+      <img
+        class="p-11 pointer-events-none"
+        src="/assets/img/logo.png"
+        alt="Logo" />
+    </a>
+
+    <div class="relative z-10 min-h-screen ml-24 flex flex-col justify-center">
+      <img
+        src="/assets/img/text.svg"
+        class="w-[57%] mt-32 pointer-events-none" />
+
+      <div class="w-[473px] h-[150px] relative mt-36">
+        <div class="w-full">
+          <div
+            class="w-[473px] h-[67px] rounded-[10px] border-4 border-[#b1a671] bg-[#09405b] flex items-center justify-center">
+            <div class="text-[#ececec] text-3xl font-bold font-['Inter']">
+              CREATE GAME
             </div>
           </div>
-        </main>
+        </div>
+
+        <div class="w-full mt-4">
+          <div
+            class="w-[473px] h-[67px] rounded-[10px] border-4 border-[#b1a671] bg-[#09405b] flex items-center justify-center">
+            <div class="text-[#ececec] text-3xl font-bold font-['Inter']">
+              JOIN GAME
+            </div>
+          </div>
+        </div>
+
+        <div class="w-full mt-4">
+          <div
+            class="w-[473px] h-[67px] rounded-[10px] border-4 border-[#b1a671] bg-[#09405b] flex items-center justify-center">
+            <div class="text-[#ececec] text-3xl font-bold font-['Inter']">
+              MARKET
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-
-    <script src="../src/main.js"></script>
   </body>
 </html>
