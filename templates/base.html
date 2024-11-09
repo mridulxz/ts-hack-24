@@ -1,53 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="/static/css/output.css" rel="stylesheet" />
+    <link rel="icon" href="/static/favicon.ico" type="image/x-icon" />
+    <link
+      rel="preload"
+      href="/static/fonts/CabinetGrotesk-Variable.ttf"
+      as="font"
+      crossorigin />
+    <link rel="prefetch" as="image" href="/static/ship.png" />
+    <link rel="prefetch" as="image" href="/static/dice{{ dice_num }}.png" />
+    <link href="/static/css/general-sans.css" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&family=Fira+Mono:wght@400;500;700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet" />
+    <title>The Bored Games</title>
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link href="/static/css/output.css" rel="stylesheet" />
-  <link rel="icon" href="/static/favicon.ico" type="image/x-icon" />
-  <link rel="preload" href="/static/fonts/CabinetGrotesk-Variable.ttf" as="font" type="font/truetype" crossorigin />
-  <link rel="prefetch" as="image" href="/static/ship.png" />
-  <link rel="prefetch" as="image" href="/static/dice{{ dice_num }}.png" />
-  <link href="/static/css/general-sans.css" rel="stylesheet" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&family=Fira+Mono:wght@400;500;700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
-    rel="stylesheet" />
-  <title>The Bored Games</title>
-</head>
+  <body
+    class="w-full h-full font-sans bg-neutral-950 {{ 'overflow-hidden' if active_page == 'about' else 'overflow-x-hidden' }}">
+    {% macro nav_item(href, text, current) %}
+    <a href="{{ href }}" class="text-xl font-semibold text-neutral-300">
+      {{ text }}
+    </a>
+    {% endmacro %}
 
-<body class="w-full h-full overflow-x-hidden font-sans bg-neutral-950">
-  {% macro nav_item(href, text, current) %}
-  <a href="{{ href }}" class="text-xl font-semibold text-neutral-300">
-    {{ text }}
-  </a>
-  {% endmacro %}
-
-  <div class="flex fixed z-[30] justify-center w-full">
-    <div class="absolute h-[40px] w-[300px] bg-green-600 top"></div>
-    <div class="absolute h-[50px] w-[400px] left-0 top-4 bg-green-600 top"></div>
-    <div class="absolute h-[50px] w-[400px] right-0 top-2 bg-green-600 top"></div>
-    <div
-      class="flex items-center px-12 justify-between gap-[120px] bg-neutral-950/80 backdrop-blur-2xl  w-full h-20 relative">
-      <div class="flex items-center gap-4">
-        <a href="/"><img src="/static/logo.png" alt="logo" class="h-12"></a>
-      </div>
-      <!-- <div class="absolute top-2 left-1/2 w-[50px]"> -->
-      <!--   <img class="absolute left-0 pointer-events-none" src="/static/dice{{ dice_num }}.png" alt="Dice" /> -->
-      <!-- </div> -->
-      <div class="flex gap-6 items-center">
-        {{ nav_item('/careers', 'Careers', 'careers') }} {{ nav_item('/about',
-        'About', 'about') }}
-        <a href="/shop"
-          class="text-white text-xl bg-green-600 font-semibold px-6 py-2 rounded-md hover:bg-green-700 transition">Shop</a>
+    <div class="flex fixed z-[30] justify-center w-full">
+      <div class="absolute h-[40px] w-[300px] bg-green-600 top"></div>
+      <div
+        class="absolute h-[50px] w-[400px] left-0 top-4 bg-green-600 top"></div>
+      <div
+        class="absolute h-[50px] w-[400px] right-0 top-2 bg-green-600 top"></div>
+      <div
+        class="flex items-center px-12 justify-between gap-[120px] bg-neutral-950/80 backdrop-blur-2xl w-full h-20 relative">
+        <div class="flex items-center gap-4">
+          <a href="/"><img src="/static/logo.png" alt="logo" class="h-12" /></a>
+        </div>
+        <!-- <div class="absolute top-2 left-1/2 w-[50px]"> -->
+        <!--   <img class="absolute left-0 pointer-events-none" src="/static/dice{{ dice_num }}.png" alt="Dice" /> -->
+        <!-- </div> -->
+        <div class="flex gap-6 items-center">
+          {{ nav_item('/careers', 'Careers', 'careers') }} {{ nav_item('/about',
+          'About', 'about') }}
+          <a
+            href="/shop"
+            class="text-white text-xl bg-green-600 font-semibold px-6 py-2 rounded-md hover:bg-green-700 transition">
+            Shop
+          </a>
+        </div>
       </div>
     </div>
-  </div>
 
-  {% block content %}{% endblock %}
-
-</body>
-
+    {% block content %}{% endblock %}
+  </body>
 </html>
