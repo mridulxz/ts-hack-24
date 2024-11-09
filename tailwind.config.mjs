@@ -3,7 +3,9 @@ module.exports = {
   content: ["./templates/**/*.{html,js}"],
   theme: {
     extend: {
-      fontFamily: {},
+      fontFamily: {
+        "sans": ["CabinetGrotesk"]
+      },
     },
   },
   plugins: [],

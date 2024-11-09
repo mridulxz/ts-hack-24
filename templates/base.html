@@ -1,67 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link href="/static/css/output.css" rel="stylesheet" />
-    <link rel="icon" href="/static/favicon.ico" type="image/x-icon" />
-    <link
-      rel="preload"
-      href="/static/fonts/GeneralSans-Regular.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin />
-    <link
-      rel="preload"
-      href="/static/fonts/GeneralSans-Medium.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin />
-    <link
-      rel="preload"
-      href="/static/fonts/GeneralSans-Semibold.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin />
-    <link rel="prefetch" as="image" href="/static/ship.png" />
-    <link rel="prefetch" as="image" href="/static/dice{{ dice_num }}.png" />
-    <link href="/static/css/general-sans.css" rel="stylesheet" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&family=Fira+Mono:wght@400;500;700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
-      rel="stylesheet" />
-    <title>The Bored Games</title>
-  </head>
-  <body class="w-full h-full overflow-hidden bg-[#201F1F]">
-    <a href="/" class="absolute top-0 left-0">
-      <img class="p-11 pointer-events-none" src="/static/logo.png" />
-    </a>
 
-    {% macro nav_item(href, text, current) %}
-    <a
-      href="{{ href }}"
-      class="text-[35px] font-['GeneralSans-Medium'] {% if active_page == current %}text-[#0ee26e] border-b-2 border-[#ececec] mb-1{% else %}text-[#ececec]{% endif %}">
-      {{ text }}
-    </a>
-    {% endmacro %}
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="/static/css/output.css" rel="stylesheet" />
+  <link rel="icon" href="/static/favicon.ico" type="image/x-icon" />
+  <link rel="preload" href="/static/fonts/CabinetGrotesk-Variable.ttf" as="font" type="font/truetype" crossorigin />
+  <link rel="prefetch" as="image" href="/static/ship.png" />
+  <link rel="prefetch" as="image" href="/static/dice{{ dice_num }}.png" />
+  <link href="/static/css/general-sans.css" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&family=Fira+Mono:wght@400;500;700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+    rel="stylesheet" />
+  <title>The Bored Games</title>
+</head>
 
-    <div class="flex justify-center w-full mt-8 ml-8">
-      <div
-        class="flex items-center justify-center gap-[120px] bg-[#262626] rounded-full px-24 h-20 shadow-[0_2px_3px_rgba(0,0,0,1)] relative">
-        {{ nav_item('/', 'Home', 'home') }} {{ nav_item('/shop', 'Shop', 'shop')
-        }}
-        <div class="relative w-[103px] h-[90px]">
-          <img
-            class="absolute -top-4 -bottom-4 left-0 pointer-events-none"
-            src="/static/dice{{ dice_num }}.png"
-            alt="Dice" />
-        </div>
+<body class="w-full h-full overflow-x-hidden font-sans bg-neutral-950">
+  {% macro nav_item(href, text, current) %}
+  <a href="{{ href }}" class="text-xl font-semibold text-neutral-300">
+    {{ text }}
+  </a>
+  {% endmacro %}
+
+  <div class="flex fixed z-[30] justify-center w-full">
+    <div class="absolute h-[40px] w-[300px] bg-green-600 top"></div>
+    <div class="absolute h-[50px] w-[400px] left-0 top-4 bg-green-600 top"></div>
+    <div class="absolute h-[50px] w-[400px] right-0 top-2 bg-green-600 top"></div>
+    <div
+      class="flex items-center px-12 justify-between gap-[120px] bg-neutral-950/80 backdrop-blur-2xl  w-full h-20 relative">
+      <div class="flex items-center gap-4">
+        <a href="/"><img src="/static/logo.png" alt="logo" class="h-12"></a>
+      </div>
+      <!-- <div class="absolute top-2 left-1/2 w-[50px]"> -->
+      <!--   <img class="absolute left-0 pointer-events-none" src="/static/dice{{ dice_num }}.png" alt="Dice" /> -->
+      <!-- </div> -->
+      <div class="flex gap-6 items-center">
         {{ nav_item('/careers', 'Careers', 'careers') }} {{ nav_item('/about',
         'About', 'about') }}
+        <a href="/shop"
+          class="text-white text-xl bg-green-600 font-semibold px-6 py-2 rounded-md hover:bg-green-700 transition">Shop</a>
       </div>
     </div>
+  </div>
 
-    {% block content %}{% endblock %}
-  </body>
+  {% block content %}{% endblock %}
+
+</body>
+
 </html>
