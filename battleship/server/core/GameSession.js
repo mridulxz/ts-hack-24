@@ -103,13 +103,14 @@ class GameSession {
     if (hit) {
       this.game[`${otherPlayerId}_shipsLost`]++;
       this.handleHit(otherPlayerId);
+      this.socket.emit("message", "Hit! Take another shot!");
     } else {
       this.socket.emit("message", "You hit water!");
       this.socket.broadcast.to(this.gameId).emit("message", "Enemy missed!");
+      this.nextTurn();
     }
 
     this.updateGrids();
-    this.nextTurn();
   }
 
   updateGrids() {
