@@ -7,37 +7,35 @@
     <link rel="stylesheet" href="./css/style.css" />
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <head>
-      <style>
-        @keyframes gridMove {
-          0% {
-            transform: translateY(0);
-          }
-
-          100% {
-            transform: translateY(72px);
-          }
+    <style>
+      @keyframes gridMove {
+        0% {
+          transform: translateY(0);
         }
 
-        .animate-grid {
-          animation: gridMove 3s linear infinite;
-          will-change: transform;
+        100% {
+          transform: translateY(72px);
         }
+      }
 
-        .grid-fade {
-          mask-image: linear-gradient(
-            to bottom,
-            transparent 0%,
-            black 5%,
-            black 95%,
-            transparent 100%
-          );
-        }
-      </style>
-    </head>
+      .animate-grid {
+        animation: gridMove 3s linear infinite;
+        will-change: transform;
+      }
+
+      .grid-fade {
+        mask-image: linear-gradient(
+          to bottom,
+          transparent 0%,
+          black 5%,
+          black 95%,
+          transparent 100%
+        );
+      }
+    </style>
   </head>
 
-  <body>
+  <body class="overflow-hidden">
     <div class="fixed inset-0 grid-fade -z-5">
       <div
         class="absolute inset-0 h-[200%] animate-grid"
@@ -65,100 +63,95 @@
         <div class="logo">
           <a href="/">
             <img src="./assets/img/battleship.svg" alt="Battleship" />
-            <h1 class="text-center">
-              Battle
-              <span style="color: antiquewhite">ship!</span>
-            </h1>
+            <h1>Battleship</h1>
           </a>
         </div>
-        <div class="status-text text-center">
-          <div class="status">
-            <h1 class="text-center">
-              <span style="color: rgb(218, 26, 26)">Round:</span>
-              <span id="current-round-txt"></span>
-            </h1>
-          </div>
-          <div class="status">
-            <h1 class="text-center">
-              <span style="color: rgb(218, 26, 26)">Current:</span>
-              <span id="current-turn-txt"></span>
-            </h1>
-          </div>
-        </div>
       </header>
+
       <main>
         <div id="game">
-          <div class="board">
-            <div class="displays">
-              <div class="left">
-                <div class="grid" id="enemy-grid"></div>
-              </div>
-              <div class="right">
-                <div class="grid" id="friendly-grid"></div>
-              </div>
+          <div class="game-status">
+            <h3>Game Status</h3>
+            <div class="status-item">
+              <div class="status-label">Round</div>
+              <div class="status-value" id="current-round-txt">0</div>
+            </div>
+            <div class="status-item">
+              <div class="status-label">Current</div>
+              <div class="status-value" id="current-turn-txt">Waiting...</div>
             </div>
           </div>
-          <div class="panels">
-            <div id="console" class="console">
-              <h5 class="text-center"><strong>Chat</strong></h5>
-              <ul id="chat-messages-list"></ul>
-              <form>
-                <input
-                  type="text"
-                  name="chat-message"
-                  class="u-full-width"
-                  id="chat-message-input"
-                  placeholder="Type something..."
-                  style="color: #c4c4c4 !important"
-                  required
-                  autocomplete="off" />
-                <input
-                  class="button-primary"
-                  type="submit"
-                  value="Send"
-                  style="color: #c4c4c4 !important" />
-              </form>
+
+          <div class="board">
+            <div class="displays">
+              <div class="grid" id="enemy-grid"></div>
+              <div class="grid" id="friendly-grid"></div>
             </div>
-            <div class="info">
-              <h5 class="text-center"><strong>Fleet</strong></h5>
-              <table>
-                <thead>
+          </div>
+
+          <div class="info">
+            <h5 class="text-center"><strong>Fleet</strong></h5>
+            <table>
+              <thead>
+                <tr>
                   <th>#</th>
                   <th>Ship Type</th>
                   <th>Size</th>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>1x</td>
-                    <td>Carrier</td>
-                    <td>5</td>
-                  </tr>
-                  <tr>
-                    <td>1x</td>
-                    <td>Battleship</td>
-                    <td>4</td>
-                  </tr>
-                  <tr>
-                    <td>1x</td>
-                    <td>Cruiser</td>
-                    <td>3</td>
-                  </tr>
-                  <tr>
-                    <td>1x</td>
-                    <td>Submarine</td>
-                    <td>3</td>
-                  </tr>
-                  <tr>
-                    <td>1x</td>
-                    <td>Destroyer</td>
-                    <td>2</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <button class="leave-game-button" id="leave-game-btn">Leave Game</button>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>1x</td>
+                  <td>Carrier</td>
+                  <td>5</td>
+                </tr>
+                <tr>
+                  <td>1x</td>
+                  <td>Battleship</td>
+                  <td>4</td>
+                </tr>
+                <tr>
+                  <td>1x</td>
+                  <td>Cruiser</td>
+                  <td>3</td>
+                </tr>
+                <tr>
+                  <td>1x</td>
+                  <td>Submarine</td>
+                  <td>3</td>
+                </tr>
+                <tr>
+                  <td>1x</td>
+                  <td>Destroyer</td>
+                  <td>2</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
+
+        <div id="console" class="console">
+          <ul id="chat-messages-list"></ul>
+          <form>
+            <input
+              type="text"
+              name="chat-message"
+              class="u-full-width"
+              id="chat-message-input"
+              placeholder="Type something..."
+              required
+              autocomplete="off" />
+            <input
+              class="button-primary"
+              type="submit"
+              value="Send"
+              type="button" />
+          </form>
+        </div>
+
+        <button class="leave-game-button" id="leave-game-btn">
+          Leave Game
+        </button>
       </main>
     </div>
 
