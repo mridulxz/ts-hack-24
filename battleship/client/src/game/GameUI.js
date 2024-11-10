@@ -7,7 +7,6 @@ export default class GameUI {
     this.state = gameState;
     this.gridManager = new GridManager();
     this.elements = {
-      headerLogo: getElement(".header .logo a"),
       currentRound: getElement("#current-round-txt"),
       currentTurn: getElement("#current-turn-txt"),
       enemyGrid: getElement("#enemy-grid"),

@@ -58,102 +58,95 @@
           #000;
       "></div>
 
-    <div class="relative min-h screen">
-      <header class="header">
-        <div class="logo">
-          <a href="/">
-            <img src="./assets/img/battleship.svg" alt="Battleship" />
-            <h1>Battleship</h1>
-          </a>
-        </div>
-      </header>
-
-      <main>
-        <div id="game">
-          <div class="game-status">
-            <h3>Game Status</h3>
-            <div class="status-item">
-              <div class="status-label">Round</div>
-              <div class="status-value" id="current-round-txt">0</div>
-            </div>
-            <div class="status-item">
-              <div class="status-label">Current</div>
-              <div class="status-value" id="current-turn-txt">Waiting...</div>
-            </div>
-          </div>
-
-          <div class="board">
-            <div class="displays">
-              <div class="grid" id="enemy-grid"></div>
-              <div class="grid" id="friendly-grid"></div>
-            </div>
-          </div>
-
-          <div class="info">
-            <h5 class="text-center"><strong>Fleet</strong></h5>
-            <table>
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Ship Type</th>
-                  <th>Size</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>1x</td>
-                  <td>Carrier</td>
-                  <td>5</td>
-                </tr>
-                <tr>
-                  <td>1x</td>
-                  <td>Battleship</td>
-                  <td>4</td>
-                </tr>
-                <tr>
-                  <td>1x</td>
-                  <td>Cruiser</td>
-                  <td>3</td>
-                </tr>
-                <tr>
-                  <td>1x</td>
-                  <td>Submarine</td>
-                  <td>3</td>
-                </tr>
-                <tr>
-                  <td>1x</td>
-                  <td>Destroyer</td>
-                  <td>2</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div id="console" class="console">
-          <ul id="chat-messages-list"></ul>
-          <form>
-            <input
-              type="text"
-              name="chat-message"
-              class="u-full-width"
-              id="chat-message-input"
-              placeholder="Type something..."
-              required
-              autocomplete="off" />
-            <input
-              class="button-primary"
-              type="submit"
-              value="Send"
-              type="button" />
-          </form>
-        </div>
-
-        <button class="leave-game-button" id="leave-game-btn">
-          Leave Game
-        </button>
-      </main>
+    <div class="relative z-10 select-none">
+      <img
+        src="/assets/img/text.svg"
+        class="w-[40%] mx-auto pt-12 pointer-events-none" />
     </div>
+
+    <main>
+      <div id="game">
+        <div class="game-status">
+          <h3>Game Status</h3>
+          <div class="status-item">
+            <div class="status-label">Round</div>
+            <div class="status-value" id="current-round-txt">0</div>
+          </div>
+          <div class="status-item">
+            <div class="status-label">Current</div>
+            <div class="status-value" id="current-turn-txt">Waiting...</div>
+          </div>
+        </div>
+
+        <div class="board">
+          <div class="displays">
+            <div class="grid" id="enemy-grid"></div>
+            <div class="grid" id="friendly-grid"></div>
+          </div>
+        </div>
+
+        <div class="info">
+          <h5 class="text-center"><strong>Fleet</strong></h5>
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Ship Type</th>
+                <th>Size</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1x</td>
+                <td>Carrier</td>
+                <td>5</td>
+              </tr>
+              <tr>
+                <td>1x</td>
+                <td>Battleship</td>
+                <td>4</td>
+              </tr>
+              <tr>
+                <td>1x</td>
+                <td>Cruiser</td>
+                <td>3</td>
+              </tr>
+              <tr>
+                <td>1x</td>
+                <td>Submarine</td>
+                <td>3</td>
+              </tr>
+              <tr>
+                <td>1x</td>
+                <td>Destroyer</td>
+                <td>2</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="console" class="console">
+        <ul id="chat-messages-list"></ul>
+        <form>
+          <input
+            type="text"
+            name="chat-message"
+            class="u-full-width"
+            id="chat-message-input"
+            placeholder="Type something..."
+            required
+            autocomplete="off" />
+          <input
+            class="button-primary"
+            type="submit"
+            value="Send"
+            type="button" />
+        </form>
+      </div>
+
+      <button class="leave-game-button" id="leave-game-btn">Leave Game</button>
+    </main>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qs/6.9.4/qs.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>

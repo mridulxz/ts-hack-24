@@ -54,7 +54,6 @@ class BattleshipGame {
     this.socket = null;
 
     this.ui = {
-      headerLogo: null,
       currentRound: null,
       currentTurn: null,
       enemyGrid: null,
@@ -92,7 +91,6 @@ class BattleshipGame {
   }
 
   initializeUI() {
-    this.ui.headerLogo = document.querySelector(".header .logo a");
     this.ui.currentRound = document.querySelector("#current-round-txt");
     this.ui.currentTurn = document.querySelector("#current-turn-txt");
     this.ui.enemyGrid = document.querySelector("#enemy-grid");
@@ -184,11 +182,6 @@ class BattleshipGame {
           `Rotation: ${this.state.isVertical ? "Vertical" : "Horizontal"}`
         );
       }
-    });
-
-    this.ui.headerLogo.addEventListener("click", (e) => {
-      e.preventDefault();
-      this.leaveGame();
     });
 
     this.ui.buttons.leaveGame.addEventListener("click", () => this.leaveGame());
