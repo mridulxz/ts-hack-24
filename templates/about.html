@@ -1,23 +1,68 @@
 {% extends "base.html" %} {% block content %}
-
-<img src="/static/aboutIllus.png" class="absolute bottom-0 right-0 scale-[0.85] origin-bottom-right pointer-events-none" alt="aboutbgRect" />
-
-<div class="relative min-h-screen overflow-hidden">
-  <div class="fixed top-0 left-0 pointer-events-none">
-    <img src="/static/aboutbgRect.png" class="w-full h-auto scale-[0.8] origin-top-left" alt="aboutbgRect" />
+<div class="relative bg-neutral-950 text-white  h-screen overflow-hidden flex ">
+  <div class="w-1/2 flex flex-col self-center px-24">
+  <h1 class="text-[14rem] text-center leading-[17rem] text-neutral-950 bg-green-600 inline font-bold">WHO</h1>
+  <h1 class="text-[8rem] text-right font-bold">ARE WE?</h1>
+  <p class="text-neutral-400 text-xl">Lorem ipsum dolor sit amet consectetur adipisicing elit. Corporis architecto optio earum ipsa nesciunt quidem nostrum sit, tenetur doloribus animi laborum voluptatibus temporibus cum ea accusamus ipsum quis, perferendis odit.</p>
   </div>
+  <div class="w-1/2 flex justify-center">
+  <img src="/static/about.png" class="h-[90%] self-end">
+  </div>
+</div>
+<div class="bg-[#06682d] flex flex-col items-center py-24 w-screen p-12">
+  <h1 class="text-white text-center text-[6rem] font-extrabold">MEET THE TEAM</h1>
+  <div class="w-full p-3 flex">
 
-  <!-- need better way to align the who instead of using mt-20 -->
-  <div class="relative z-10 min-h-screen ml-[5.5rem] flex flex-col justify-center">
-    <span class="text-[#201f1f] text-[15.625rem] font-bold leading-[300px] mt-20">
-      WHO
-      <br />
-    </span>
-    <span class="text-[#e0e0e0] text-[12.5rem] -ml-4 font-bold leading-[200px] -mt-12">ARE WE?</span>
-    <div class="w-[800px]">
-      <span class="text-[#a1a1a1] text-3xl fontnormal leading-[30px]">At</span><span class="text-[#0ee26e] text-3xl fontnormal leading-[30px]">TheBoredGames</span><span class="text-[#a1a1a1] text-3xl fontnormal leading-[30px]">, we're a group of people who believe that the joy of traditional board games should be accessible to everyone, anywhere, at any time. Our mission is to blend the nostalgia of game nights with the convenience of modern technology, allowing friends, families, and communities to connect and compete in innovative ways.</span>
+    <div class="w-1/5 p-2">
+      <div class="w-full p-4 bg-neutral-950 flex flex-col text-white">
+        <img src="/static/capn.png" alt="" class="grayscale">
+        <div class="mt-6 w-full justify-between">
+          <h1 class="text-2xl font-bold">Name Namington</h1>
+        </div>
+          <h1 class="text-xl text-neutral-400">Some useless role </h1>
+      </div>
+    </div>
+    <div class="w-1/5 p-2">
+      <div class="w-full p-4 bg-neutral-950 flex flex-col text-white">
+        <img src="/static/capn.png" alt="" class="grayscale">
+        <div class="mt-6 w-full justify-between">
+          <h1 class="text-2xl font-bold">Name Namington</h1>
+        </div>
+          <h1 class="text-xl text-neutral-400">Some useless role </h1>
+      </div>
+    </div>
+    <div class="w-1/5 p-2">
+      <div class="w-full p-4 bg-neutral-950 flex flex-col text-white">
+        <img src="/static/capn.png" alt="" class="grayscale">
+        <div class="mt-6 w-full justify-between">
+          <h1 class="text-2xl font-bold">Name Namington</h1>
+        </div>
+          <h1 class="text-xl text-neutral-400">Some useless role </h1>
+      </div>
+    </div>
+    <div class="w-1/5 p-2">
+      <div class="w-full p-4 bg-neutral-950 flex flex-col text-white">
+        <img src="/static/capn.png" alt="" class="grayscale">
+        <div class="mt-6 w-full justify-between">
+          <h1 class="text-2xl font-bold">Name Namington</h1>
+        </div>
+          <h1 class="text-xl text-neutral-400">Some useless role </h1>
+      </div>
+    </div>
+    <div class="w-1/5 p-2">
+      <div class="w-full p-4 bg-neutral-950 flex flex-col text-white">
+        <img src="/static/capn.png" alt="" class="grayscale">
+        <div class="mt-6 w-full justify-between">
+          <h1 class="text-2xl font-bold">Name Namington</h1>
+        </div>
+          <h1 class="text-xl text-neutral-400">Some useless role </h1>
+      </div>
     </div>
   </div>
-
-  {% endblock %}
 </div>
+<div class="p-24 text-white flex flex-col items-center justify-center">
+    <h1 class="text-4xl">Subscribe to our news letter</h1>
+    <p class="w-1/4 text-neutral-400 text-center my-4 ">Lorem ipsum dolor sit amet consectetur adipisicing elit. Expedita, quis consectetur adipisicing elit!</p>
+    <input type="text" class="text-white w-1/2 bg-neutral-900 p-3 px-8 text-xl focus:outline-none rounded-full mt-4">
+</div>
+{% endblock %}
