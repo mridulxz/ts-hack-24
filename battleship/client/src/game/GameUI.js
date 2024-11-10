@@ -1,6 +1,6 @@
-import { MESSAGES } from './config.js';
-import { getElement, getElements } from '../utils/domUtils.js';
-import GridManager from './GridManager.js';
+import { getElement } from "../utils/domUtils.js";
+import { MESSAGES } from "./config.js";
+import GridManager from "./GridManager.js";
 
 export default class GameUI {
   constructor(gameState) {
@@ -63,7 +63,8 @@ export default class GameUI {
 
   scrollChatToBottom() {
     if (this.elements.chatMessages.dataset.autoScroll !== "false") {
-      this.elements.chatMessages.scrollTop = this.elements.chatMessages.scrollHeight;
+      this.elements.chatMessages.scrollTop =
+        this.elements.chatMessages.scrollHeight;
     }
   }
 

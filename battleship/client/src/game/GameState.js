@@ -1,4 +1,4 @@
-import { GAME_STATES, GRID_SIZE, SHIPS } from './config.js';
+import { GAME_STATES, GRID_SIZE, SHIPS } from "./config.js";
 
 export default class GameState {
   constructor() {
@@ -19,7 +19,9 @@ export default class GameState {
   }
 
   createEmptyGrid() {
-    return Array(GRID_SIZE).fill().map(() => Array(GRID_SIZE).fill(0));
+    return Array(GRID_SIZE)
+      .fill()
+      .map(() => Array(GRID_SIZE).fill(0));
   }
 
   updateFromQueryParams(params) {

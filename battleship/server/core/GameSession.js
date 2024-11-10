@@ -1,6 +1,6 @@
-const config = require('../config');
-const { createEmptyGrid, isValidCoordinate } = require('../utils/gameUtils');
-const GameStateManager = require('./GameStateManager');
+const config = require("../config");
+const { createEmptyGrid, isValidCoordinate } = require("../utils/gameUtils");
+const GameStateManager = require("./GameStateManager");
 
 class GameSession {
   constructor(socket, gameId, playerId, playerName) {
@@ -23,7 +23,10 @@ class GameSession {
       !config.SHIPS[shipType] ||
       this.game[`${this.playerId}_placedShips`][shipType]
     ) {
-      this.socket.emit("message", "Invalid ship selection or ship already placed");
+      this.socket.emit(
+        "message",
+        "Invalid ship selection or ship already placed"
+      );
       return;
     }
 
@@ -31,7 +34,10 @@ class GameSession {
     y = config.LETTERS.indexOf(y);
 
     if (!this.isValidShipPlacement(x, y, size, isVertical)) {
-      this.socket.emit("message", "Invalid ship placement! Try another position.");
+      this.socket.emit(
+        "message",
+        "Invalid ship placement! Try another position."
+      );
       return;
     }
 
@@ -109,13 +115,13 @@ class GameSession {
   updateGrids() {
     this.socket.emit("updateGrid", {
       gridToUpdate: "enemyGrid",
-      data: this.otherPlayerGrid
+      data: this.otherPlayerGrid,
     });
 
     const otherPlayerId = this.getOtherPlayerId();
     this.socket.broadcast.to(this.gameId).emit("updateGrid", {
       gridToUpdate: "friendlyGrid",
-      data: this.game[`${otherPlayerId}_grid`]
+      data: this.game[`${otherPlayerId}_grid`],
     });
   }
 
@@ -141,14 +147,18 @@ class GameSession {
     this.socket.broadcast
       .to(this.gameId)
       .emit("message", "Defeat! All ships lost!");
-    this.io.to(this.gameId).emit(
-      "message",
-      `${this.playerName} wins! Returning to menu in 10 seconds...`
-    );
+    this.io
+      .to(this.gameId)
+      .emit(
+        "message",
+        `${this.playerName} wins! Returning to menu in 10 seconds...`
+      );
   }
 
   handleDisconnect() {
-    this.io.to(this.gameId).emit("message", `${this.playerName} has left the game.`);
+    this.io
+      .to(this.gameId)
+      .emit("message", `${this.playerName} has left the game.`);
 
     this.game.players = this.game.players.filter(
       (player) => player.id !== this.playerId
@@ -156,10 +166,12 @@ class GameSession {
     this.game.gameState = config.GAME_STATES.OVER;
 
     this.io.to(this.gameId).emit("changeGameState", config.GAME_STATES.OVER);
-    this.io.to(this.gameId).emit(
-      "message",
-      "Game over - opponent disconnected! Returning to menu in 10 seconds..."
-    );
+    this.io
+      .to(this.gameId)
+      .emit(
+        "message",
+        "Game over - opponent disconnected! Returning to menu in 10 seconds..."
+      );
 
     if (this.game.players.length === 0) {
       GameStateManager.removeGame(this.gameId);
@@ -173,8 +185,12 @@ class GameSession {
 
     if (player1Ships === allShipsPlaced && player2Ships === allShipsPlaced) {
       this.game.gameState = config.GAME_STATES.RUNNING;
-      this.io.to(this.gameId).emit("changeGameState", config.GAME_STATES.RUNNING);
-      this.io.to(this.gameId).emit("message", "All ships placed! Battle begins!");
+      this.io
+        .to(this.gameId)
+        .emit("changeGameState", config.GAME_STATES.RUNNING);
+      this.io
+        .to(this.gameId)
+        .emit("message", "All ships placed! Battle begins!");
       this.io.to(this.gameId).emit("nextRound");
 
       this.socket.emit("yourTurn", false);

@@ -1,4 +1,4 @@
-import { createGridCell } from '../utils/domUtils.js';
+import { createGridCell } from "../utils/domUtils.js";
 
 export default class GridManager {
   static LETTERS = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"];
