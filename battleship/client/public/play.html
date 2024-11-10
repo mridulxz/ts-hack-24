@@ -1,18 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Playing Battleship!</title>
+    <link rel="stylesheet" href="./css/style.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Playing Battleship!</title>
-  <link rel="stylesheet" href="./css/normalize.min.css" />
-  <link rel="stylesheet" href="./css/skeleton.min.css" />
-  <link rel="stylesheet" href="./css/style.css" />
-</head>
+    <head>
+      <style>
+        @keyframes gridMove {
+          0% {
+            transform: translateY(0);
+          }
 
-<body>
-  <div class="background">
-    <div class="background-overlay">
+          100% {
+            transform: translateY(72px);
+          }
+        }
+
+        .animate-grid {
+          animation: gridMove 3s linear infinite;
+          will-change: transform;
+        }
+
+        .grid-fade {
+          mask-image: linear-gradient(
+            to bottom,
+            transparent 0%,
+            black 5%,
+            black 95%,
+            transparent 100%
+          );
+        }
+      </style>
+    </head>
+  </head>
+
+  <body>
+    <div class="fixed inset-0 grid-fade -z-5">
+      <div
+        class="absolute inset-0 h-[200%] animate-grid"
+        style="
+          background: linear-gradient(to right, #80808012 1px, transparent 1px),
+            linear-gradient(to bottom, #80808012 1px, transparent 1px);
+          background-size: 72px 72px;
+        "></div>
+    </div>
+
+    <div
+      class="fixed inset-0 bg-center bg-cover bg-no-repeat -z-10"
+      style="
+        background: linear-gradient(
+            180deg,
+            rgba(0, 0, 0, 0) 0%,
+            rgba(12, 145, 73, 0.08) 72%,
+            rgba(22, 255, 127, 0.1) 100%
+          ),
+          #000;
+      "></div>
+
+    <div class="relative min-h screen">
       <header class="header">
         <div class="logo">
           <a href="/">
@@ -55,9 +103,20 @@
               <h5 class="text-center"><strong>Chat</strong></h5>
               <ul id="chat-messages-list"></ul>
               <form>
-                <input type="text" name="chat-message" class="u-full-width" id="chat-message-input"
-                  placeholder="Type something..." style="color: #c4c4c4 !important" required autocomplete="off" />
-                <input class="button-primary" type="submit" value="Send" style="color: #c4c4c4 !important" />
+                <input
+                  type="text"
+                  name="chat-message"
+                  class="u-full-width"
+                  id="chat-message-input"
+                  placeholder="Type something..."
+                  style="color: #c4c4c4 !important"
+                  required
+                  autocomplete="off" />
+                <input
+                  class="button-primary"
+                  type="submit"
+                  value="Send"
+                  style="color: #c4c4c4 !important" />
               </form>
             </div>
             <div class="info">
@@ -97,31 +156,14 @@
                 </tbody>
               </table>
             </div>
-            <div class="panel">
-              <h5 class="text-center"><strong>Options</strong></h5>
-              <button class="button" id="show-rules-btn">Rules</button>
-              <button class="button" id="toogle-music-btn">
-                Toggle Music
-              </button>
-              <button class="button" id="toogle-sound-btn">
-                Toggle Sound
-              </button>
-              <button class="button" id="toggle-fullscreen-btn">
-                Toggle Fullscreen
-              </button>
-              <button class="button-primary" id="leave-game-btn">
-                Leave Game
-              </button>
-            </div>
+            <button class="leave-game-button" id="leave-game-btn">Leave Game</button>
           </div>
         </div>
       </main>
     </div>
-  </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qs/6.9.4/qs.min.js"></script>
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="../src/game.js"></script>
-</body>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qs/6.9.4/qs.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="../src/game.js"></script>
+  </body>
 </html>

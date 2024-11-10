@@ -102,10 +102,6 @@ class BattleshipGame {
     this.ui.chatInput = document.querySelector("#chat-message-input");
 
     this.ui.buttons = {
-      showRules: document.querySelector("#show-rules-btn"),
-      toggleMusic: document.querySelector("#toogle-music-btn"),
-      toggleSound: document.querySelector("#toogle-sound-btn"),
-      toggleFullscreen: document.querySelector("#toggle-fullscreen-btn"),
       leaveGame: document.querySelector("#leave-game-btn"),
     };
 
@@ -195,18 +191,6 @@ class BattleshipGame {
       this.leaveGame();
     });
 
-    this.ui.buttons.showRules.addEventListener("click", () =>
-      alert("Coming Soon!")
-    );
-    this.ui.buttons.toggleMusic.addEventListener("click", () =>
-      alert("Coming Soon!")
-    );
-    this.ui.buttons.toggleSound.addEventListener("click", () =>
-      alert("Coming Soon!")
-    );
-    this.ui.buttons.toggleFullscreen.addEventListener("click", () =>
-      this.toggleFullScreen()
-    );
     this.ui.buttons.leaveGame.addEventListener("click", () => this.leaveGame());
 
     document.addEventListener("keydown", (e) => {

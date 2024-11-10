@@ -11,26 +11,180 @@ body {
   color: #f5f5f5;
   min-height: 100vh;
   font-family: "Roboto Mono", monospace;
-  font-weight: 300 !important;
+  font-weight: 300;
+  font-size: 1.5em;
+  line-height: 1.6;
+  background: #000;
 }
 
-button,
-input[type="submit"],
-.button,
-.button-primary {
-  font-family: "Roboto Mono", monospace;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin-top: 0;
+  margin-bottom: 1rem;
   font-weight: 300;
+}
+
+h1 {
+  font-size: 2rem;
+  line-height: 1.2;
+}
+h5 {
+  font-size: 1.2rem;
+  line-height: 1.5;
+}
+
+.header {
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 0.5rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.header .logo {
+  flex: 0 1 auto;
+}
+
+.header .logo a {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  gap: 1rem;
+}
+
+.header .logo img {
+  width: 40px;
+  height: 40px;
+}
+
+.header .logo h1 {
+  text-transform: uppercase;
+  letter-spacing: 0.1rem;
+  font-size: 2.5rem;
+  font-weight: 100;
+  color: rgb(218, 26, 26);
+  margin: 0;
+}
+
+.status-text {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.status h1 {
   font-size: 1.5rem;
+  margin: 0;
+}
+
+main {
+  padding: 1rem;
+}
+
+.displays {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+  padding: 0 270px 0 370px; /* Make room for fleet and chat */
+}
+
+.panels {
+  display: flex;
+  justify-content: flex-start;
+  gap: 2rem;
+  position: relative;
+}
+
+.grid {
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11);
+}
+
+.grid table {
+  border-spacing: 3px;
+  border-collapse: separate;
+  font-size: 0.9rem;
+}
+
+.grid table caption h5 {
+  margin-bottom: 1rem;
+  text-transform: capitalize;
+}
+
+.left .grid table caption {
+  color: rgb(218, 26, 26);
+}
+.right .grid table caption {
+  color: #33c3f0;
+}
+
+.grid table th {
+  text-align: center;
+  padding: 0.25rem;
+  color: #f5f5f5;
+}
+
+.grid table td {
+  background-color: #33c3f0;
+  border: 1px solid rgba(0, 0, 0, 0.7);
+  padding: 0.25rem;
+  width: 2rem;
+  height: 2rem;
+  text-align: center;
+  cursor: pointer;
+}
+
+.grid table td:hover {
+  background-color: #206f86;
 }
 
 .grid .cell.preview {
   background-color: rgba(0, 255, 0, 0.3);
-  cursor: pointer;
 }
-
 .grid .cell.preview.invalid {
   background-color: rgba(255, 0, 0, 0.3);
   cursor: not-allowed;
+}
+.grid .cell.ship {
+  background-color: #666;
+}
+.grid .cell.ship-hit {
+  background-color: #ff4444;
+}
+.grid .cell.water-hit {
+  background-color: #44aaff;
+}
+
+.info {
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  width: 250px;
+  position: absolute;
+  right: 20px;
+  top: 0;
+}
+
+.info table {
+  width: 100%;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.info table th,
+.info table td {
+  padding: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .info table tbody tr.placed {
@@ -46,237 +200,88 @@ input[type="submit"],
   background-color: rgba(0, 0, 255, 0.1);
 }
 
-.grid .cell.ship {
-  background-color: #666;
-}
-
-.grid .cell.ship-hit {
-  background-color: #ff4444;
-}
-
-.grid .cell.water-hit {
-  background-color: #44aaff;
-}
-
-/* Optional: Add hover effect for cells that aren't being previewed */
-.grid .cell:not(.preview):hover {
-  background-color: rgba(200, 200, 200, 0.3);
-}
-
-.background {
-  background-image: url("../assets/img/bg.png");
-  background-position: center;
-  background-size: cover;
-  background-repeat: no-repeat;
-}
-
-.background-overlay {
-  /* background-color: #1b647abb;
-  background-blend-mode: darken; */
-  min-height: 100vh;
-}
-
-.header {
-  background-color: rgba(0, 0, 0, 0.7);
-  color: white;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  padding: 1rem;
-}
-
-.header h1 {
-  padding: 1rem 0;
-  font-size: 2.25rem;
-  margin: 0 auto;
-}
-
-.header .logo {
-  margin: 0 auto;
-}
-
-.header .logo a {
-  display: flex;
-  text-decoration: none;
-  flex: 2;
-}
-
-.header .logo img {
-  padding: 1rem 0;
-  width: 65px;
-  height: 65px;
-}
-
-.header .logo h1 {
-  text-transform: uppercase;
-  letter-spacing: 0.1rem;
-  font-size: 3.5rem;
-  font-weight: 100;
-  color: rgb(218, 26, 26);
-}
-
-.status-text {
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  flex-wrap: wrap;
-  flex: 10;
-}
-
-.header .status {
-  margin: 0 auto;
-}
-
-.displays,
-.panels {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-evenly;
-  margin-top: 1rem;
-}
-
-.grid {
-  box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
-  border-radius: 1em;
-  background-color: rgba(0, 0, 0, 0.7);
-  margin: 1rem;
-  padding: 1.5rem;
-}
-
-.grid table {
-  font-size: 1.4rem;
-  border-spacing: 5px;
-  padding: 1rem;
-}
-
-.grid table caption h5 {
-  margin: 0;
-  margin-bottom: 2rem;
-  text-transform: capitalize;
-}
-
-.left .grid table caption {
-  color: rgb(218, 26, 26);
-}
-
-.right .grid table caption {
-  color: #33c3f0;
-}
-
-.grid table,
-.grid th,
-.grid td {
-  border-collapse: collapse;
-  text-transform: uppercase;
-}
-
-.grid table th {
-  text-align: center;
-  padding: 0.25rem 0.75rem;
-  border: none;
-}
-
-.grid table td {
-  background-color: #33c3f0;
-  border: 1px solid rgba(0, 0, 0, 0.7);
-  padding: 0.25rem 0.75rem;
-}
-
-.grid table td.ship {
-  background-color: rgb(68, 68, 68);
-}
-
-.grid table td.water-hit {
-  background-color: rgb(238, 159, 159);
-}
-
-.grid table td.ship-hit {
-  background-color: rgb(209, 15, 15);
-}
-
-.grid table td:hover {
-  background-color: #206f86;
-  cursor: pointer;
-}
-
-.panel,
-.info {
-  padding: 1.5rem;
-  margin: 1.5rem 2rem;
-  background-color: rgba(0, 0, 0, 0.7);
-  border-radius: 1em;
-  box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
-}
-
 .panel {
-  flex: 1;
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  min-width: 200px;
   max-width: 250px;
-  align-self: flex-start;
 }
 
-.panel.main-menu {
-  max-width: 600px;
-  margin-top: 10vh;
+.leave-game-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  color: #fff;
+  background: linear-gradient(135deg, #ff4444 0%, #ff1111 100%);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  box-shadow: 0 4px 15px rgba(255, 68, 68, 0.2);
+  z-index: 1000;
 }
 
-.panel.main-menu button {
-  width: 100%;
+.leave-game-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 68, 68, 0.3);
+  background: linear-gradient(135deg, #ff5555 0%, #ff2222 100%);
 }
 
-.panel.main-menu button:not(:first-of-type) {
-  margin-top: 2rem;
-}
-
-.info {
-  flex: 2;
-  max-width: 260px;
-  align-self: flex-start;
-}
-
-.info table {
-  margin: 2rem auto;
+.leave-game-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 10px rgba(255, 68, 68, 0.2);
 }
 
 .panel button {
-  display: block;
-  margin: 1rem auto;
-  width: 220px;
+  width: 100%;
+  margin-bottom: 0.5rem;
 }
 
-.info table th,
-.info table td {
+button,
+.button,
+.button-primary {
+  display: inline-block;
   padding: 0.5rem 1rem;
-}
-
-.console {
-  flex: 3;
-  min-width: 300px;
-}
-
-.button {
+  color: #f5f5f5;
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 300;
+  text-decoration: none;
   background-color: rgba(0, 0, 0, 0.5);
-  color: #f5f5f5;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s ease;
 }
 
-.button:hover,
-.button:focus {
+button:hover,
+.button:hover {
   background-color: rgba(0, 0, 0, 0.8);
-  color: #f5f5f5;
 }
 
 .button-primary {
-  color: #000 !important;
-  font-weight: 400 !important;
+  background-color: #33c3f0;
+  border-color: #33c3f0;
 }
 
-/* Console overlay styles */
+.button-primary:hover {
+  background-color: #1eaedb;
+  border-color: #1eaedb;
+}
+
 .console {
   position: fixed;
   bottom: 20px;
   left: 20px;
-  width: 400px;
+  right: auto;
+  width: 350px;
   max-width: 90vw;
-  background: transparent;
   z-index: 1000;
 }
 
@@ -284,59 +289,72 @@ input[type="submit"],
   display: none;
 }
 
-/* Messages container */
 .console ul {
-  list-style: none;
-  background: transparent;
-  height: 300px;
+  height: 250px;
   overflow-y: auto;
-  margin: 0 0 10px 0;
-  padding: 0;
-  scroll-behavior: smooth;
+  margin-bottom: 10px;
   padding-right: 6px;
+  list-style: none;
 }
 
-/* Custom scrollbar for messages */
 .console ul::-webkit-scrollbar {
-  width: 6px;
-}
-
-.console ul::-webkit-scrollbar-track {
-  background: transparent;
+  width: 4px;
 }
 
 .console ul::-webkit-scrollbar-thumb {
-  background: rgba(196, 196, 196, 0.2);
-  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
 }
 
-.console ul::-webkit-scrollbar-thumb:hover {
-  background: rgba(196, 196, 196, 0.3);
-}
-
-/* Individual message styling */
 .console ul li {
-  word-wrap: break-word;
-  margin: 4px 0;
   padding: 8px 12px;
-  color: #fff;
-  background-color: rgba(0, 0, 0, 0.5);
-  border-radius: 8px;
-  opacity: 0;
-  transform: translateY(20px);
-  animation: fadeInUp 0.5s ease forwards;
+  background-color: rgba(0, 0, 0, 0.7);
+  border-radius: 4px;
+  margin-bottom: 4px;
+  font-size: 0.9rem;
+  animation: fadeInUp 0.3s ease forwards;
 }
 
 .console ul li.fading {
   animation: fadeOut 0.8s ease forwards;
-  pointer-events: none;
 }
 
-/* Message animations */
+.console form {
+  display: flex;
+  gap: 0.5rem;
+  background-color: rgba(0, 0, 0, 0.7);
+  border-radius: 4px;
+  padding: 0.5rem;
+}
+
+.console form input[type="text"] {
+  flex: 1;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0.5rem;
+  color: #f5f5f5;
+  font-size: 0.9rem;
+  border-radius: 4px;
+}
+
+.console form input[type="submit"] {
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #f5f5f5;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.console form input[type="submit"]:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -345,93 +363,44 @@ input[type="submit"],
 }
 
 @keyframes fadeOut {
-  from {
-    opacity: 1;
-    transform: translateY(0);
-  }
   to {
     opacity: 0;
-    transform: translateY(-20px);
-    margin-top: -35px;
-  }
-}
-
-/* Combined input form styling */
-.console form {
-  display: flex;
-  align-items: center;
-  margin: 0;
-  background-color: #2e2e2e;
-  border-radius: 25px;
-  padding: 5px 5px 5px 16px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* Input field styling */
-.console form input[type="text"] {
-  flex: 1;
-  margin: 0;
-  padding: 8px 0;
-  font-size: 14px;
-  color: #6b6b6b;
-  background: transparent;
-  border: none;
-  outline: none;
-  height: auto;
-}
-
-.console form input[type="text"]::placeholder {
-  color: #6b6b6b;
-}
-
-/* Submit button styling */
-.console form input[type="submit"] {
-  background: transparent;
-  border: none;
-  color: #c4c4c4;
-  padding: 8px 16px;
-  font-size: 14px;
-  cursor: pointer;
-  margin: 0;
-  height: auto;
-  line-height: normal;
-  transition: all 0.3s ease;
-  border-radius: 20px;
-}
-
-.console form input[type="submit"]:hover {
-  color: #fff;
-  transform: scale(1.05);
-  background: transparent;
-}
-
-/* Remove default button styles */
-.console form input[type="submit"]:focus,
-.console form input[type="submit"]:active {
-  outline: none;
-  background: transparent;
-}
-
-/* Media query for responsive layout */
-@media (max-width: 768px) {
-  .console {
-    width: 100%;
-    max-width: 100%;
-    bottom: 0;
-    left: 0;
-    padding: 10px;
-  }
-
-  .console form {
-    max-width: calc(100% - 20px);
-    margin: 0 auto;
+    transform: translateY(-10px);
   }
 }
 
 .text-center {
   text-align: center;
 }
-
 .hidden {
   display: none;
+}
+.u-full-width {
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .leave-game-button {
+    position: fixed;
+    bottom: 90px; /* Position above chat on mobile */
+    top: auto;
+    right: 20px;
+    font-size: 0.9rem;
+    padding: 0.6rem 1.5rem;
+  }
+
+  .info {
+    margin-right: 0;
+    max-width: 100%;
+  }
+
+  .console {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-width: 100%;
+    padding: 1rem;
+  }
 }
