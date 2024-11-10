@@ -7,60 +7,34 @@
     <title>Battleship</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&family=Fira+Mono:wght@400;500;700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
-      rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&family=Fira+Mono:wght@400;500;700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
   </head>
   <body class="w-full h-screen overflow-hidden relative">
-    <div
-      class="absolute inset-0 w-full h-full bg-[url('/assets/img/bg.png')] bg-center bg-cover bg-no-repeat z-0"></div>
+    <div class="absolute inset-0 w-full h-full bg-center bg-cover bg-no-repeat z-0" style="background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(12, 145, 73, 0.14) 72%, rgba(22, 255, 127, 0.2) 100%), #000"></div>
+    <div class="absolute inset-0 h-full w-full z-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_2px),linear-gradient(to_bottom,#80808012_2px,transparent_1px)] bg-[size:72px_72px]"></div>
 
-    <a href="https://tbg.rex.wf" class="absolute top-0 left-0 z-10">
-      <img
-        class="p-11 pointer-events-none"
-        src="/assets/img/logo.png"
-        alt="Logo" />
-    </a>
+    <div class="absolute top-0 left-0 z-10 p-11">
+      <a href="https://tbg.rex.wf">
+        <img class="pointer-events-none" src="/assets/img/logo.png" alt="Logo" />
+      </a>
+    </div>
 
-    <div class="relative z-10 min-h-screen ml-24 flex flex-col justify-center">
-      <img
-        src="/assets/img/text.svg"
-        class="w-[57%] mt-32 pointer-events-none" />
+    <div class="absolute top-0 right-0 z-10 p-11">
+      <a href="https://tbg.rex.wf">
+        <img class="pointer-events-none" src="/assets/img/pfp.png" alt="pfp" />
+      </a>
+    </div>
 
-      <a href="/create">
-      <div class="w-[30rem] h-36 relative mt-36">
-        <div class="w-full">
-          <div
-            class="w-[30rem] h-16 rounded-lg border-4 border-[#b1a671] bg-[#09405b] flex items-center justify-center">
-            <div class="text-[#ececec] text-3xl font-bold font-['Inter']">
-              CREATE GAME
-            </div>
-          </div>
+    <div class="relative z-10 min-h-screen">
+      <img src="/assets/img/text.svg" class="w-1/2 mx-auto pt-32 pointer-events-none" />
+
+      <div class="relative w-[60%] mx-auto pt-8">
+        <img src="/assets/img/cards.png" />
+        <div class="absolute inset-0 flex">
+          <a href="http://tbg.rex.wf/shop" class="w-1/3 h-full" aria-label="Card 1"></a>
+          <a href="/create" class="w-1/3 h-full" aria-label="Card 2"></a>
+          <a href="/join" class="w-1/3 h-full" aria-label="Card 3"></a>
         </div>
-        </a>
-
-        <a href="/join">
-        <div class="w-full mt-4">
-          <div
-            class="w-[30rem] h-16 rounded-lg border-4 border-[#b1a671] bg-[#09405b] flex items-center justify-center">
-            <div class="text-[#ececec] text-3xl font-bold font-['Inter']">
-              JOIN GAME
-            </div>
-          </div>
-        </div>
-        </a>
-
-        <a href="#">
-        <div class="w-full mt-4">
-          <div
-            class="w-[30rem] h-16 rounded-lg border-4 border-[#b1a671] bg-[#09405b] flex items-center justify-center">
-            <div class="text-[#ececec] text-3xl font-bold font-['Inter']">
-              MARKET
-            </div>
-          </div>
-        </div>
-        </a>
-
       </div>
     </div>
   </body>
