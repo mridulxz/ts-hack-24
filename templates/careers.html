@@ -1,3 +1,39 @@
 {% extends "base.html" %} {% block content %} 
-<div class="min-h-screen"></div>
+<div class="min-h-screen text-white pt-24 pb-24 flex flex-col items-center">
+  <h1 class="text-[4rem] font-extrabold text-neutral-200">We are hiring!</h1>
+  <div class="mt-2 mb-8 w-full px-4 md:w-1/2 text-center text-neutral-400 text-xl">Lorem ipsum, dolor sit amet consectetur adipisicing elit. Architecto sequi voluptas a vero consequuntur consectetur consequatur suscipit dolorem doloribus odit!</div>
+<p class="marquee w-full text-3xl p-2 bg-amber-300 font-bold text-black">
+  <span>WE ARE HIRING! &nbsp; WE ARE HIRING! &nbsp; WE ARE HIRING! &nbsp; WE ARE HIRING! &nbsp; WE ARE HIRING! &nbsp; WE ARE HIRING! &nbsp; WE ARE HIRING! &nbsp; WE ARE HIRING! &nbsp; WE ARE HIRING! &nbsp; WE ARE HIRING! &nbsp; WE ARE HIRING! &nbsp; WE ARE HIRING! &nbsp; WE ARE HIRING! &nbsp; WE ARE HIRING! &nbsp;WE ARE HIRING! &nbsp; WE ARE HIRING! &nbsp; WE ARE HIRING! &nbsp;</span>
+</p>
+<div class="flex items-center justify-start w-full mt-16">
+  <img src="/static/gun1.png" class="w-1/2" alt="">
+  <div class="w-1/2 flex justify-center">
+    <div class="p-8 rounded-lg flex flex-col w-1/2 bg-neutral-900 items-center relative">
+      <div class="absolute h-full w-full flex justify-center items-center">
+        <div class="h-64 w-64 bg-green-500/20 mb-20 blur-2xl"></div>
+      </div>      
+      <img src="/static/headphones.png" class="h-72 z-[20] my-8" alt="">
+      <div class="flex w-full items-center justify-between">
+        <p class="text-2xl">Audio Producer</p>
+        <button class="rounded-full bg-green-500 text-black px-4 py-2">Apply Now</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="flex items-center justify-start w-full mt-24">
+  <div class="w-1/2 flex justify-center">
+    <div class="p-8 rounded-lg flex flex-col w-1/2 bg-neutral-900 items-center relative">
+      <div class="absolute h-full w-full flex justify-center items-center">
+        <div class="h-64 w-64 bg-green-500/20 mb-20 blur-2xl"></div>
+      </div>      
+      <img src="/static/gamecontroller.png" class="h-72 z-[20] my-8" alt="">
+      <div class="flex w-full items-center justify-between">
+        <p class="text-2xl">Game Tester</p>
+        <button class="rounded-full bg-green-500 text-black px-4 py-2">Apply Now</button>
+      </div>
+    </div>
+  </div>
+  <img src="/static/gun2.png" class="w-1/2" alt="">
+</div>
+</div>
 {% endblock %}
