@@ -42,13 +42,12 @@ git pull
 # Determine whether to run app.py or flask run based on argument
 if [ "$1" == "prod" ]; then
     echo "Running in production mode"
-    bun run dev &
     flask run &
 else
     echo "Running in dev mode"
-    bun run dev &
     flask --debug run &
 fi
 
+bun run build &
 
 wait
