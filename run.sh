@@ -4,21 +4,21 @@
 trap 'kill $(jobs -p); echo "Exiting..."; exit' INT
 
 # Check if pip is installed
-if ! command -v pip &> /dev/null; then
+if ! command -v pip &>/dev/null; then
     echo "pip is not installed. Please install it using:"
     echo "sudo apt install python3-pip"
     exit 1
 fi
 
 # Check if bun is installed
-if ! command -v bun &> /dev/null; then
+if ! command -v bun &>/dev/null; then
     echo "bun is not installed. Please install it using:"
     echo "sudo apt install bun"
     exit 1
 fi
 
 # Check if Python is installed
-if ! command -v python3 &> /dev/null; then
+if ! command -v python3 &>/dev/null; then
     echo "Python is not installed. Please install it using:"
     echo "sudo apt install python3"
     exit 1
@@ -35,14 +35,14 @@ if ! [ -f .flag ]; then
         bun install -D tailwindcss
     fi
 
-    echo "First launch flag" > .flag
+    echo "First launch flag" >.flag
 fi
 
 git pull
 # Determine whether to run app.py or flask run based on argument
 if [ "$1" == "prod" ]; then
     echo "Running in production mode"
-    flask run &
+    python3 -m gunicorn --bind 0.0.0.0:5893 --timeout 120 app:app &
 else
     echo "Running in dev mode"
     flask --debug run &
