@@ -1,6 +1,5 @@
 class BattleshipGame {
   constructor() {
-    // Constants
     this.GRID_SIZE = 10;
     this.GAME_STATES = {
       INITIALIZING: "gameIsInitializing",
@@ -35,7 +34,6 @@ class BattleshipGame {
         `Selected ${shipType} (size: ${size}). Press R to rotate.`,
     };
 
-    // Game state
     this.state = {
       gameId: "",
       gameState: this.GAME_STATES.INITIALIZING,
@@ -53,10 +51,8 @@ class BattleshipGame {
       ),
     };
 
-    // Socket connection
     this.socket = null;
 
-    // UI Elements
     this.ui = {
       headerLogo: null,
       currentRound: null,
@@ -77,7 +73,6 @@ class BattleshipGame {
   }
 
   initialize() {
-    // Get query parameters
     const { playerName, game, playerId } = Qs.parse(location.search, {
       ignoreQueryPrefix: true,
     });
@@ -91,15 +86,12 @@ class BattleshipGame {
     this.state.playerName = playerName;
     this.state.playerId = playerId;
 
-    // Initialize socket
     this.initializeSocket();
 
-    // Initialize UI when DOM is ready
     document.addEventListener("DOMContentLoaded", () => this.initializeUI());
   }
 
   initializeUI() {
-    // Cache UI elements
     this.ui.headerLogo = document.querySelector(".header .logo a");
     this.ui.currentRound = document.querySelector("#current-round-txt");
     this.ui.currentTurn = document.querySelector("#current-turn-txt");
@@ -117,21 +109,14 @@ class BattleshipGame {
       leaveGame: document.querySelector("#leave-game-btn"),
     };
 
-    // Initialize UI state
     this.ui.currentRound.innerHTML = "0";
     this.ui.currentTurn.innerHTML = this.MESSAGES.WAIT_FOR_START;
     this.ui.chatInput.focus();
 
-    // Initialize grids
     this.initializeGrids();
-
-    // Setup event listeners
     this.setupEventListeners();
 
-    // Clean up URL
     window.history.replaceState({}, document.title, "/play");
-
-    // Show initial message
     this.addConsoleMessage(this.MESSAGES.INITIALIZING);
   }
 
@@ -141,7 +126,6 @@ class BattleshipGame {
 
     this.setupSocketListeners();
 
-    // Join game
     this.socket.emit("joinGame", {
       gameId: this.state.gameId,
       playerId: this.state.playerId,
@@ -189,17 +173,14 @@ class BattleshipGame {
   }
 
   setupEventListeners() {
-    // Grid click handlers
     [this.ui.enemyGrid, this.ui.friendlyGrid].forEach((grid) => {
       grid.addEventListener("click", (e) => this.handleGridClick(e));
     });
 
-    // Ship selection
     document.querySelectorAll(".info table tbody tr").forEach((row) => {
       row.addEventListener("click", () => this.handleShipSelection(row));
     });
 
-    // Rotation handler
     document.addEventListener("keydown", (e) => {
       if (e.key.toLowerCase() === "r") {
         this.state.isVertical = !this.state.isVertical;
@@ -209,7 +190,6 @@ class BattleshipGame {
       }
     });
 
-    // Button handlers
     this.ui.headerLogo.addEventListener("click", (e) => {
       e.preventDefault();
       this.leaveGame();
@@ -229,7 +209,6 @@ class BattleshipGame {
     );
     this.ui.buttons.leaveGame.addEventListener("click", () => this.leaveGame());
 
-    // Chat handlers
     document.addEventListener("keydown", (e) => {
       if (e.keyCode === 13) this.ui.chatInput.focus();
     });
@@ -410,7 +389,7 @@ class BattleshipGame {
     this.ui.chatMessages.appendChild(messageElement);
     this.scrollChatToBottom();
 
-    // Fade out message after delay
+    // fade out message after delay
     setTimeout(() => {
       messageElement.classList.add("fading");
       setTimeout(() => messageElement.remove(), 800);

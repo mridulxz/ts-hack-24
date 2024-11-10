@@ -3,7 +3,6 @@ const express = require("express");
 const router = express.Router();
 const gameController = require("../controllers/gameController");
 
-// Routes for pages
 router.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "../../../client/public/index.html"));
 });
@@ -17,6 +16,10 @@ router.get("/join", (req, res) => {
 });
 
 router.get("/play", (req, res) => {
+  const { playerName, game, playerId } = req.query;
+  if (!playerName || !game || !playerId) {
+    return res.redirect("/");
+  }
   res.sendFile(path.join(__dirname, "../../../client/public/play.html"));
 });
 

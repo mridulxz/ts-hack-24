@@ -13,10 +13,10 @@ const config = {
       carrier: { size: 5, count: 1 },
       battleship: { size: 4, count: 1 },
       cruiser: { size: 3, count: 1 },
+      submarine: { size: 3, count: 1 },
       destroyer: { size: 2, count: 1 },
-      submarine: { size: 1, count: 1 },
     },
-    TOTAL_SHIP_CELLS: 15 // Pre-calculated sum of all ship sizes
+    TOTAL_SHIP_CELLS: 17
   };
   
   module.exports = config;

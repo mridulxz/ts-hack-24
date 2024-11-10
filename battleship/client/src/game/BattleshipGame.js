@@ -38,7 +38,6 @@ export default class BattleshipGame {
   }
 }
 
-// www/js/game.js (entry point)
 import BattleshipGame from "./game/BattleshipGame.js";
 
 (() => {

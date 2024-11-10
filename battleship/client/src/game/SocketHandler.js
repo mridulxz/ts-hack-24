@@ -30,7 +30,6 @@ export default class SocketHandler {
       });
     }
   
-    // Event handlers
     handleNextRound() {
       this.state.currentRound++;
       this.ui.elements.currentRound.innerHTML = this.state.currentRound;

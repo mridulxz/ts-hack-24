@@ -11,21 +11,25 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// Middleware
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
+
+app.use((req, res, next) => {
+  if (req.path.toLowerCase().endsWith(".html")) {
+    return res.redirect("/");
+  }
+  next();
+});
+
 app.use(express.static(path.join(__dirname, "../client/public")));
 app.use("/src", express.static(path.join(__dirname, "../client/src")));
 
-// Routes
 app.use("/", gameRoutes);
 
-// Start server
 const server = app.listen(config.PORT, () => {
   console.log(`Server running on port ${config.PORT}`);
 });
 
-// Initialize Socket.IO
 const io = new Server(server);
 setupSocketHandlers(io);
 
