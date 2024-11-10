@@ -1,34 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <title>Battleship</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&family=Fira+Mono:wght@400;500;700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
-  </head>
-  <body class="w-full h-screen overflow-hidden relative">
-    <div class="absolute inset-0 w-full h-full bg-center bg-cover bg-no-repeat z-0" style="background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(12, 145, 73, 0.14) 72%, rgba(22, 255, 127, 0.2) 100%), #000"></div>
-    <div class="absolute inset-0 h-full w-full z-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_2px),linear-gradient(to_bottom,#80808012_2px,transparent_1px)] bg-[size:72px_72px]"></div>
 
-    <div class="absolute top-0 left-0 z-10 p-11">
-      <a href="https://tbg.rex.wf">
-        <img class="pointer-events-none" src="/assets/img/logo.png" alt="Logo" />
-      </a>
-    </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Battleship</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&family=Fira+Mono:wght@400;500;700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+    rel="stylesheet" />
+</head>
 
-    <div class="absolute top-0 right-0 z-10 p-11">
-      <a href="https://tbg.rex.wf">
-        <img class="pointer-events-none" src="/assets/img/pfp.png" alt="pfp" />
-      </a>
-    </div>
+<body class="w-full h-screen overflow-hidden relative">
+  <div class="absolute inset-0 w-full h-full bg-center bg-cover bg-no-repeat z-0"
+    style="background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(12, 145, 73, 0.14) 72%, rgba(22, 255, 127, 0.2) 100%), #000">
+  </div>
+  <div
+    class="absolute inset-0 h-full w-full z-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_2px),linear-gradient(to_bottom,#80808012_2px,transparent_1px)] bg-[size:72px_72px]">
+  </div>
 
-    <div class="relative z-10 min-h-screen">
-      <img src="/assets/img/text.svg" class="w-1/2 mx-auto pt-32 pointer-events-none" />
+  <div class="absolute top-0 left-0 z-10 p-11">
+    <a href="https://tbg.rex.wf">
+      <img class="pointer-events-none" src="/assets/img/logo.png" alt="Logo" />
+    </a>
+  </div>
 
-      <div class="relative w-[60%] mx-auto pt-8">
+  <div class="absolute top-0 right-0 z-10 p-11">
+    <a href="https://tbg.rex.wf">
+      <img class="pointer-events-none" src="/assets/img/pfp.png" alt="pfp" />
+    </a>
+  </div>
+
+  <div class="relative z-10 min-h-screen select-none">
+    <img src="/assets/img/text.svg" class="w-[40%] mx-auto pt-24 pointer-events-none" />
+
+    <div class="pt-16 select-none">
+      <div class="relative w-[58%] mx-auto">
         <img src="/assets/img/cards.png" />
         <div class="absolute inset-0 flex">
           <a href="http://tbg.rex.wf/shop" class="w-1/3 h-full" aria-label="Card 1"></a>
@@ -37,5 +46,7 @@
         </div>
       </div>
     </div>
-  </body>
+  </div>
+</body>
+
 </html>
