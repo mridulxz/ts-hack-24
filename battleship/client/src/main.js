@@ -121,8 +121,23 @@ class JoinGameUI {
     hiddenInput.name = "playerId";
     this.form.appendChild(hiddenInput);
 
+    // Ensure default option exists
+    this.ensureDefaultOption();
     await this.updateGamesList();
     this.initializeEventListeners();
+  }
+
+  ensureDefaultOption() {
+    if (!this.gamesList) return;
+
+    let defaultOption = this.gamesList.querySelector('option[value=""]');
+
+    if (!defaultOption) {
+      defaultOption = document.createElement("option");
+      defaultOption.value = "";
+      defaultOption.text = "Select a game...";
+      this.gamesList.insertBefore(defaultOption, this.gamesList.firstChild);
+    }
   }
 
   initializeEventListeners() {
@@ -135,15 +150,29 @@ class JoinGameUI {
   async updateGamesList() {
     if (!this.gamesList) return;
 
-    const games = await this.state.updateGames();
-    this.gamesList.innerHTML = games
-      .filter((game) => game.players[0].id !== this.state.playerId)
-      .map(
-        (game) => `
-        <option value="${game.id}">${game.gameName} (${game.players.length}/2)</option>
-      `
-      )
-      .join("");
+    try {
+      const games = await this.state.updateGames();
+
+      while (this.gamesList.options.length > 1) {
+        this.gamesList.remove(1);
+      }
+
+      games
+        .filter((game) => game.players[0].id !== this.state.playerId)
+        .forEach((game) => {
+          const option = document.createElement("option");
+          option.value = game.id;
+          option.text = `${game.gameName} (${game.players.length}/2)`;
+          this.gamesList.appendChild(option);
+        });
+
+      const openGamesCount = document.getElementById("open-games-count");
+      if (openGamesCount) {
+        openGamesCount.textContent = games.length.toString();
+      }
+    } catch (error) {
+      console.error("Error updating games list:", error);
+    }
   }
 }
 

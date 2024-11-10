@@ -1,53 +1,282 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="bg-black">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@100;300;400&display=swap"
+      rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/lucide.min.js"></script>
+    <title>Create Game - Battleship</title>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              "roboto-mono": ['"Roboto Mono"', "monospace"],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      @keyframes gridMove {
+        0% {
+          transform: translateY(0);
+        }
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Create Game - Battleship</title>
-  <link rel="stylesheet" href="./css/normalize.min.css" />
-  <link rel="stylesheet" href="./css/skeleton.min.css" />
-  <link rel="stylesheet" href="./css/style.css" />
-</head>
+        100% {
+          transform: translateY(72px);
+        }
+      }
 
-<body>
-  <div class="background">
-    <div class="background-overlay">
-      <header class="header">
-        <div class="logo">
-          <a href="/">
-            <img src="./assets/img/battleship.svg" alt="Battleship" />
-            <h1 class="text-center">
-              Battle
-              <span style="color: antiquewhite">ship!</span>
-            </h1>
-          </a>
+      .animate-grid {
+        animation: gridMove 3s linear infinite;
+        will-change: transform;
+      }
+
+      .grid-fade {
+        mask-image: linear-gradient(
+          to bottom,
+          transparent 0%,
+          black 5%,
+          black 95%,
+          transparent 100%
+        );
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 0.3;
+        }
+
+        50% {
+          opacity: 0.8;
+        }
+      }
+
+      .radar-sweep {
+        animation: rotate 4s linear infinite;
+        transform-origin: center;
+      }
+
+      @keyframes rotate {
+        from {
+          transform: rotate(0deg);
+        }
+
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .coordinates-border {
+        background: linear-gradient(
+              to right,
+              transparent 20%,
+              #ffffff10 50%,
+              transparent 80%
+            )
+            top,
+          linear-gradient(
+              to right,
+              transparent 20%,
+              #ffffff10 50%,
+              transparent 80%
+            )
+            bottom;
+        background-size: 100% 1px;
+        background-repeat: no-repeat;
+      }
+
+      .scanner-line {
+        animation: scan 2s linear infinite;
+      }
+
+      @keyframes scan {
+        0% {
+          transform: translateY(-100%);
+          opacity: 0;
+        }
+
+        50% {
+          opacity: 0.5;
+        }
+
+        100% {
+          transform: translateY(100%);
+          opacity: 0;
+        }
+      }
+    </style>
+  </head>
+
+  <body class="w-full h-screen font-roboto-mono font-light text-[#f5f5f5]">
+    <div class="fixed inset-0 grid-fade -z-5">
+      <div
+        class="absolute inset-0 h-[200%] animate-grid"
+        style="
+          background: linear-gradient(to right, #80808012 1px, transparent 1px),
+            linear-gradient(to bottom, #80808012 1px, transparent 1px);
+          background-size: 72px 72px;
+        "></div>
+    </div>
+
+    <div
+      class="fixed inset-0 bg-center bg-cover bg-no-repeat -z-10"
+      style="
+        background: linear-gradient(
+            180deg,
+            rgba(0, 0, 0, 0) 0%,
+            rgba(12, 145, 73, 0.08) 72%,
+            rgba(22, 255, 127, 0.1) 100%
+          ),
+          #000;
+      "></div>
+
+    <div
+      class="fixed top-6 right-6 text-white/30 select-none text-xs tracking-wider">
+      LAT: 40°42'51.8"N
+      <br />
+      LONG: 74°00'21.5"W
+    </div>
+    <div
+      class="fixed bottom-6 left-6 text-white/30 select-none text-xs tracking-wider">
+      SECTOR 7G
+      <br />
+      BATTLE GROUP ALPHA
+    </div>
+
+    <div class="absolute top-0 left-0 z-10 p-11">
+      <a href="https://tbg.rex.wf">
+        <img
+          class="pointer-events-none"
+          src="/assets/img/logo.png"
+          alt="Logo" />
+      </a>
+    </div>
+
+    <main class="flex min-h-screen items-start justify-center px-4">
+      <div
+        class="w-full max-w-[600px] mt-[15vh] p-8 bg-black/70 rounded-2xl shadow-lg backdrop-blur-sm relative">
+        <div
+          class="absolute top-0 left-0 w-16 h-16 border-l-2 border-t-2 border-white/20 -translate-x-2 -translate-y-2"></div>
+        <div
+          class="absolute top-0 right-0 w-16 h-16 border-r-2 border-t-2 border-white/20 translate-x-2 -translate-y-2"></div>
+        <div
+          class="absolute bottom-0 left-0 w-16 h-16 border-l-2 border-b-2 border-white/20 -translate-x-2 translate-y-2"></div>
+        <div
+          class="absolute bottom-0 right-0 w-16 h-16 border-r-2 border-b-2 border-white/20 translate-x-2 translate-y-2"></div>
+
+        <div
+          class="absolute -top-24 -right-24 w-48 h-48 border border-white/10 rounded-full overflow-hidden">
+          <div
+            class="absolute inset-0 border-2 border-white/5 rounded-full"></div>
+          <div
+            class="absolute inset-[25%] border border-white/5 rounded-full"></div>
+          <div
+            class="absolute top-1/2 left-1/2 w-1 h-1 bg-white/30 rounded-full"></div>
+          <div
+            class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-1 bg-gradient-to-r from-green-500/20 to-transparent radar-sweep origin-left"></div>
         </div>
-      </header>
-      <main>
-        <div id="game">
-          <div class="panels">
-            <div class="panel main-menu">
-              <div class="tab" id="create-tab">
-                <h5 class="text-center"><strong>Create New Game</strong></h5>
-                <form id="create-form" action="/games" method="post">
-                  <label for="player-name">Your Player Name:</label>
-                  <input type="text" name="playerName" class="u-full-width player-name" required />
-                  <button type="submit" class="button button-primary">
-                    Create Game
-                  </button>
-                </form>
-                <br />
-                <a href="/" class="button">Back to Main Menu</a>
-              </div>
-            </div>
+
+        <h2 class="text-2xl text-center font-normal mb-8">Create Game</h2>
+
+        <div
+          class="grid grid-cols-3 gap-4 mb-8 coordinates-border py-4 relative">
+          <div
+            class="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent w-full scanner-line"></div>
+
+          <div class="text-center p-3 bg-white/5 rounded-lg relative">
+            <div class="text-xs text-white/50 mb-1">ACTIVE GAMES</div>
+            <div class="text-xl">24</div>
+          </div>
+          <div class="text-center p-3 bg-white/5 rounded-lg">
+            <div class="text-xs text-white/50 mb-1">PLAYERS ONLINE</div>
+            <div class="text-xl">12</div>
+          </div>
+          <div class="text-center p-3 bg-white/5 rounded-lg">
+            <div class="text-xs text-white/50 mb-1">GAMES TODAY</div>
+            <div class="text-xl">156</div>
           </div>
         </div>
-      </main>
+
+        <form id="create-form" action="/games" method="post" class="space-y-6">
+          <div class="space-y-2">
+            <label
+              for="player-name"
+              class="block text-sm text-white/70 flex items-center">
+              <span class="inline-block w-2 h-2 bg-green-500/50 mr-2"></span>
+              YOUR PLAYER NAME
+            </label>
+            <input
+              type="text"
+              name="playerName"
+              id="player-name"
+              placeholder="ilovetechsyndicate"
+              class="w-full bg-black/30 border border-white/30 rounded px-4 py-3 text-white focus:outline-none focus:border-white/50 font-roboto-mono font-light transition-colors duration-200"
+              required />
+          </div>
+
+          <button
+            type="submit"
+            class="w-full py-3 text-xl bg-white text-black font-normal hover:bg-white/90 transition-colors duration-200 rounded relative overflow-hidden group">
+            <span class="relative z-10">Create Game</span>
+            <div
+              class="absolute inset-0 bg-white/20 transform translate-y-full transition-transform duration-300 group-hover:translate-y-0"></div>
+          </button>
+
+          <a
+            href="/"
+            class="block w-full text-center py-3 text-xl bg-white/5 text-white/90 font-light hover:bg-white/10 transition-colors duration-200 rounded">
+            Back to Main Menu
+          </a>
+        </form>
+
+        <div class="mt-8 p-4 bg-white/5 rounded-lg relative overflow-hidden">
+          <div class="text-sm text-white/50 mb-2 flex items-center">
+            <span class="inline-block w-1 h-1 bg-white/50 mr-2"></span>
+            QUICK TIP
+            <span class="inline-block w-1 h-1 bg-white/50 ml-2"></span>
+          </div>
+          <p class="text-sm text-white/70" id="tip-text">
+            Place your ships strategically. The corners are often safe spots,
+            but becoming too predictable can be dangerous.
+          </p>
+        </div>
+      </div>
+    </main>
+
+    <div class="fixed bottom-4 right-4 flex items-center text-white/30 text-sm">
+      <span
+        class="inline-block w-1.5 h-1.5 rounded-full bg-green-500/50 mr-2 animate-pulse"></span>
+      Connected
     </div>
-  </div>
 
-  <script src="../src/main.js"></script>
-</body>
+    <script src="../src/main.js"></script>
+    <script>
+      const tips = [
+        "Place your ships strategically. The corners are often safe spots, but becoming too predictable can be dangerous.",
+        "Remember to use a mix of horizontal and vertical ship placements to confuse your opponent.",
+        "Pay attention to your opponent's pattern of attacks to anticipate their next move.",
+        "The middle of the board often sees the most action - use this knowledge to your advantage.",
+      ];
 
+      const tipElement = document.getElementById("tip-text");
+      let currentTipIndex = 0;
+
+      tipElement.style.transition = "opacity 0.5s ease-in-out";
+
+      setInterval(() => {
+        currentTipIndex = (currentTipIndex + 1) % tips.length;
+        tipElement.style.opacity = "0";
+        setTimeout(() => {
+          tipElement.textContent = tips[currentTipIndex];
+          tipElement.style.opacity = "1";
+        }, 500);
+      }, 5000);
+    </script>
+  </body>
 </html>

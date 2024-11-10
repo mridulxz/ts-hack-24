@@ -6,19 +6,42 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://cdn.tailwindcss.com"></script>
   <title>Battleship</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&family=Fira+Mono:wght@400;500;700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
-    rel="stylesheet" />
+
+  <style>
+    @keyframes gridMove {
+      0% {
+        transform: translateY(0);
+      }
+
+      100% {
+        transform: translateY(72px);
+      }
+    }
+
+    .animate-grid {
+      animation: gridMove 3s linear infinite;
+      will-change: transform;
+    }
+
+    .grid-fade {
+      mask-image: linear-gradient(to bottom,
+          transparent 0%,
+          black 5%,
+          black 95%,
+          transparent 100%);
+    }
+  </style>
 </head>
 
 <body class="w-full h-screen overflow-hidden relative">
-  <div class="absolute inset-0 w-full h-full bg-center bg-cover bg-no-repeat z-0"
-    style="background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(12, 145, 73, 0.14) 72%, rgba(22, 255, 127, 0.2) 100%), #000">
+  <div class="fixed inset-0 bg-center bg-cover bg-no-repeat -z-10"
+    style="background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(12, 145, 73, 0.08) 72%, rgba(22, 255, 127, 0.1) 100%), #000">
   </div>
-  <div
-    class="absolute inset-0 h-full w-full z-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_2px),linear-gradient(to_bottom,#80808012_2px,transparent_1px)] bg-[size:72px_72px]">
+  <div class="fixed inset-0 grid-fade -z-5">
+    <div class="absolute inset-0 h-[200%] animate-grid" style="background: linear-gradient(to right, #80808012 1px, transparent 1px),
+              linear-gradient(to bottom, #80808012 1px, transparent 1px);
+              background-size: 72px 72px;">
+    </div>
   </div>
 
   <div class="absolute top-0 left-0 z-10 p-11">
