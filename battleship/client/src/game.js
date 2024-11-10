@@ -370,7 +370,7 @@ class BattleshipGame {
     setTimeout(() => {
       messageElement.classList.add("fading");
       setTimeout(() => messageElement.remove(), 800);
-    }, 15000);
+    }, 8000);
   }
 
   scrollChatToBottom() {
