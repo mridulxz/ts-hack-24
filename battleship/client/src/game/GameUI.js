@@ -22,6 +22,9 @@ export default class GameUI {
         leaveGame: getElement("#leave-game-btn"),
       },
     };
+    this.elements.powerups = {
+      squareBlastBtn: getElement("#activate-square-blast"),
+    };
   }
 
   initialize() {
@@ -34,6 +37,22 @@ export default class GameUI {
     this.elements.currentTurn.innerHTML = MESSAGES.WAIT_FOR_START;
     this.elements.chatInput.focus();
     this.initializeGrids();
+  }
+
+  setupEventListeners() {
+    this.elements.powerups.squareBlastBtn.addEventListener("click", () => {
+      if (
+        this.state.powerups.squareBlast.count > 0 &&
+        !this.state.powerups.squareBlast.isActive
+      ) {
+        this.state.powerups.squareBlast.isActive = true;
+        this.elements.powerups.squareBlastBtn.textContent = "Active";
+        this.elements.powerups.squareBlastBtn.classList.add("bg-green-500/40");
+        this.addConsoleMessage(
+          "Square Blast powerup activated! Your next attack will hit a 2x2 area."
+        );
+      }
+    });
   }
 
   initializeGrids() {

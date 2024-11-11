@@ -83,36 +83,156 @@ class GameSession {
     }
   }
 
-  handleAttack({ x, y }) {
+  handleAttack({ x, y, isSquareBlast, isRadarScan }) {
     if (this.game.gameState !== config.GAME_STATES.RUNNING) return;
 
     const otherPlayerId = this.getOtherPlayerId();
     y = config.LETTERS.indexOf(y);
 
-    const targetCell = this.game[`${otherPlayerId}_grid`][y][x];
+    // Handle Radar Scan
+    if (isRadarScan) {
+      const scanPositions = [];
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+          const scanY = y + dy;
+          const scanX = x + dx;
+          if (isValidCoordinate(scanX, scanY, config.GRID_SIZE)) {
+            scanPositions.push([scanY, scanX]);
+          }
+        }
+      }
 
-    if (targetCell === 2 || targetCell === 3) {
-      this.socket.emit("message", "You already hit that spot!");
+      let shipsDetected = 0;
+      for (const [scanY, scanX] of scanPositions) {
+        const cell = this.game[`${otherPlayerId}_grid`][scanY][scanX];
+        if (cell === 1) {
+          // 1 represents an unhit ship
+          shipsDetected++;
+        }
+      }
+
+      // Send detailed feedback
+      if (shipsDetected > 0) {
+        let message;
+        if (shipsDetected === 1) {
+          message = "Radar detected a ship part in the scanned area!";
+        } else if (shipsDetected <= 3) {
+          message = `Radar detected a few ship parts (${shipsDetected}) in the scanned area!`;
+        } else {
+          message = `Radar detected many ship parts (${shipsDetected}) in the scanned area!`;
+        }
+
+        this.socket.emit("message", message);
+        this.socket.broadcast
+          .to(this.gameId)
+          .emit("message", "Enemy radar has scanned your ships!");
+      } else {
+        this.socket.emit(
+          "message",
+          "Radar scan complete: Area is clear of ships."
+        );
+        this.socket.broadcast
+          .to(this.gameId)
+          .emit("message", "Enemy radar has scanned your waters.");
+      }
+
+      // Don't update grids or change turns for radar
       return;
     }
 
-    const hit = targetCell === 1;
-    this.game[`${otherPlayerId}_grid`][y][x] = hit ? 3 : 2;
-    this.otherPlayerGrid[y][x] = hit ? 3 : 2;
+    // Handle Square Blast
+    if (isSquareBlast) {
+      const hitPositions = [
+        [y, x], // Top left
+        [y, x + 1], // Top right
+        [y + 1, x], // Bottom left
+        [y + 1, x + 1], // Bottom right
+      ];
 
-    if (hit) {
-      this.game[`${otherPlayerId}_shipsLost`]++;
-      this.handleHit(otherPlayerId);
-      this.socket.emit("message", "Hit! Take another shot!");
-    } else {
-      this.socket.emit("message", "You hit water!");
-      this.socket.broadcast.to(this.gameId).emit("message", "Enemy missed!");
+      let totalHits = 0;
+      let newHits = false;
+
+      for (const [hitY, hitX] of hitPositions) {
+        if (!isValidCoordinate(hitX, hitY, config.GRID_SIZE)) continue;
+
+        const targetCell = this.game[`${otherPlayerId}_grid`][hitY][hitX];
+
+        if (targetCell === 2 || targetCell === 3) continue;
+
+        newHits = true;
+        const isHit = targetCell === 1;
+
+        this.game[`${otherPlayerId}_grid`][hitY][hitX] = isHit ? 3 : 2;
+        this.otherPlayerGrid[hitY][hitX] = isHit ? 3 : 2;
+
+        if (isHit) {
+          totalHits++;
+          this.game[`${otherPlayerId}_shipsLost`]++;
+        }
+      }
+
+      if (totalHits > 0) {
+        this.socket.emit(
+          "message",
+          `Square Blast hit ${totalHits} ship parts!`
+        );
+        this.socket.broadcast
+          .to(this.gameId)
+          .emit(
+            "message",
+            `Enemy's Square Blast hit ${totalHits} of your ship parts!`
+          );
+
+        if (
+          this.game[`${otherPlayerId}_shipsLost`] >= config.TOTAL_SHIP_CELLS
+        ) {
+          this.handleGameOver();
+          return;
+        }
+      } else {
+        this.socket.emit("message", "Square Blast missed all targets!");
+        this.socket.broadcast
+          .to(this.gameId)
+          .emit("message", "Enemy's Square Blast missed completely!");
+      }
+
       this.nextTurn();
+    } else {
+      // Regular single-cell attack
+      const targetCell = this.game[`${otherPlayerId}_grid`][y][x];
+
+      if (targetCell === 2 || targetCell === 3) {
+        this.socket.emit("message", "You already hit that spot!");
+        return;
+      }
+
+      const hit = targetCell === 1;
+      this.game[`${otherPlayerId}_grid`][y][x] = hit ? 3 : 2;
+      this.otherPlayerGrid[y][x] = hit ? 3 : 2;
+
+      if (hit) {
+        this.game[`${otherPlayerId}_shipsLost`]++;
+
+        if (
+          this.game[`${otherPlayerId}_shipsLost`] >= config.TOTAL_SHIP_CELLS
+        ) {
+          this.handleGameOver();
+          return;
+        }
+
+        this.socket.emit("message", "Direct hit! Take another shot!");
+        this.socket.broadcast
+          .to(this.gameId)
+          .emit("message", "Your ship was hit!");
+      } else {
+        this.socket.emit("message", "Miss! You hit water!");
+        this.socket.broadcast.to(this.gameId).emit("message", "Enemy missed!");
+        this.nextTurn();
+      }
     }
 
     this.updateGrids();
   }
-
   updateGrids() {
     this.socket.emit("updateGrid", {
       gridToUpdate: "enemyGrid",

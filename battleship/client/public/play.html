@@ -1,54 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Playing Battleship!</title>
-    <link rel="stylesheet" href="./css/style.css" />
-    <script src="https://cdn.tailwindcss.com"></script>
 
-    <style>
-      @keyframes gridMove {
-        0% {
-          transform: translateY(0);
-        }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Playing Battleship!</title>
+  <link rel="stylesheet" href="./css/style.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
 
-        100% {
-          transform: translateY(72px);
-        }
+  <style>
+    @keyframes gridMove {
+      0% {
+        transform: translateY(0);
       }
 
-      .animate-grid {
-        animation: gridMove 3s linear infinite;
-        will-change: transform;
+      100% {
+        transform: translateY(72px);
       }
+    }
 
-      .grid-fade {
-        mask-image: linear-gradient(
-          to bottom,
+    .animate-grid {
+      animation: gridMove 3s linear infinite;
+      will-change: transform;
+    }
+
+    .grid-fade {
+      mask-image: linear-gradient(to bottom,
           transparent 0%,
           black 5%,
           black 95%,
-          transparent 100%
-        );
-      }
-    </style>
-  </head>
+          transparent 100%);
+    }
+  </style>
+</head>
 
-  <body class="overflow-hidden">
-    <div class="fixed inset-0 grid-fade -z-5">
-      <div
-        class="absolute inset-0 h-[200%] animate-grid"
-        style="
+<body class="overflow-hidden">
+  <div class="fixed inset-0 grid-fade -z-5">
+    <div class="absolute inset-0 h-[200%] animate-grid" style="
           background: linear-gradient(to right, #80808012 1px, transparent 1px),
             linear-gradient(to bottom, #80808012 1px, transparent 1px);
           background-size: 72px 72px;
         "></div>
-    </div>
+  </div>
 
-    <div
-      class="fixed inset-0 bg-center bg-cover bg-no-repeat -z-10"
-      style="
+  <div class="fixed inset-0 bg-center bg-cover bg-no-repeat -z-10" style="
         background: linear-gradient(
             180deg,
             rgba(0, 0, 0, 0) 0%,
@@ -58,98 +53,113 @@
           #000;
       "></div>
 
-    <div class="relative z-10 select-none">
-      <img
-        src="/assets/img/text.svg"
-        class="w-[40%] mx-auto pt-12 pointer-events-none" />
+  <div class="relative z-10 select-none">
+    <img src="/assets/img/text.svg" class="w-[40%] mx-auto pt-12 pointer-events-none" />
+  </div>
+
+  <main>
+    <div id="game">
+      <div class="game-status">
+        <h3>Game Status</h3>
+        <div class="status-item">
+          <div class="status-label">Round</div>
+          <div class="status-value" id="current-round-txt">0</div>
+        </div>
+        <div class="status-item">
+          <div class="status-label">Current</div>
+          <div class="status-value" id="current-turn-txt">Waiting...</div>
+        </div>
+      </div>
+
+      <div class="board">
+        <div class="displays">
+          <div class="grid" id="enemy-grid"></div>
+          <div class="grid" id="friendly-grid"></div>
+        </div>
+      </div>
+
+      <div class="info">
+        <h5 class="text-center"><strong>Fleet</strong></h5>
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Ship Type</th>
+              <th>Size</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1x</td>
+              <td>Carrier</td>
+              <td>5</td>
+            </tr>
+            <tr>
+              <td>1x</td>
+              <td>Battleship</td>
+              <td>4</td>
+            </tr>
+            <tr>
+              <td>1x</td>
+              <td>Cruiser</td>
+              <td>3</td>
+            </tr>
+            <tr>
+              <td>1x</td>
+              <td>Submarine</td>
+              <td>3</td>
+            </tr>
+            <tr>
+              <td>1x</td>
+              <td>Destroyer</td>
+              <td>2</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="mt-6 border-t border-white/10 pt-4">
+          <h5 class="text-center mb-4"><strong>Powerups</strong></h5>
+          <div class="powerup-item" id="square-blast-powerup">
+            <div class="powerup-header flex justify-between items-center mb-2">
+              <span class="powerup-name">Square Blast</span>
+              <span class="powerup-count">1</span>
+            </div>
+            <button
+              class="powerup-button w-full py-2 px-4 bg-green-500/20 border border-green-500/30 rounded text-sm transition-all duration-200 hover:bg-green-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+              id="activate-square-blast">
+              Activate
+            </button>
+          </div>
+          <div class="powerup-item mt-3" id="radar-powerup">
+            <div class="powerup-header flex justify-between items-center mb-2">
+              <span class="powerup-name">Radar Scan</span>
+              <span class="powerup-count">1</span>
+            </div>
+            <button
+              class="powerup-button w-full py-2 px-4 bg-blue-500/20 border border-blue-500/30 rounded text-sm transition-all duration-200 hover:bg-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+              id="activate-radar">
+              Activate
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <main>
-      <div id="game">
-        <div class="game-status">
-          <h3>Game Status</h3>
-          <div class="status-item">
-            <div class="status-label">Round</div>
-            <div class="status-value" id="current-round-txt">0</div>
-          </div>
-          <div class="status-item">
-            <div class="status-label">Current</div>
-            <div class="status-value" id="current-turn-txt">Waiting...</div>
-          </div>
-        </div>
+    <div id="console" class="console">
+      <ul id="chat-messages-list"></ul>
+      <form>
+        <input type="text" name="chat-message" class="u-full-width" id="chat-message-input"
+          placeholder="Type something..." required autocomplete="off" />
+        <input class="button-primary" type="submit" value="Send" type="button" />
+      </form>
+    </div>
 
-        <div class="board">
-          <div class="displays">
-            <div class="grid" id="enemy-grid"></div>
-            <div class="grid" id="friendly-grid"></div>
-          </div>
-        </div>
+    <button class="leave-game-button" id="leave-game-btn">Leave Game</button>
+  </main>
 
-        <div class="info">
-          <h5 class="text-center"><strong>Fleet</strong></h5>
-          <table>
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Ship Type</th>
-                <th>Size</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>1x</td>
-                <td>Carrier</td>
-                <td>5</td>
-              </tr>
-              <tr>
-                <td>1x</td>
-                <td>Battleship</td>
-                <td>4</td>
-              </tr>
-              <tr>
-                <td>1x</td>
-                <td>Cruiser</td>
-                <td>3</td>
-              </tr>
-              <tr>
-                <td>1x</td>
-                <td>Submarine</td>
-                <td>3</td>
-              </tr>
-              <tr>
-                <td>1x</td>
-                <td>Destroyer</td>
-                <td>2</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qs/6.9.4/qs.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="../src/game.js"></script>
+</body>
 
-      <div id="console" class="console">
-        <ul id="chat-messages-list"></ul>
-        <form>
-          <input
-            type="text"
-            name="chat-message"
-            class="u-full-width"
-            id="chat-message-input"
-            placeholder="Type something..."
-            required
-            autocomplete="off" />
-          <input
-            class="button-primary"
-            type="submit"
-            value="Send"
-            type="button" />
-        </form>
-      </div>
-
-      <button class="leave-game-button" id="leave-game-btn">Leave Game</button>
-    </main>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qs/6.9.4/qs.min.js"></script>
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="../src/game.js"></script>
-  </body>
 </html>

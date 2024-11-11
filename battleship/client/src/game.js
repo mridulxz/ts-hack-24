@@ -49,6 +49,16 @@ class BattleshipGame {
         (acc, ship) => ({ ...acc, [ship]: false }),
         {}
       ),
+      powerups: {
+        squareBlast: {
+          count: 1,
+          isActive: false,
+        },
+        radar: {
+          count: 1,
+          isActive: false,
+        },
+      },
     };
 
     this.socket = null;
@@ -199,13 +209,68 @@ class BattleshipGame {
       this.ui.chatInput.value = "";
       this.ui.chatInput.focus();
     });
+
+    const squareBlastBtn = document.querySelector("#activate-square-blast");
+    if (squareBlastBtn) {
+      squareBlastBtn.addEventListener("click", () => {
+        if (
+          this.state.powerups.squareBlast.count > 0 &&
+          !this.state.powerups.squareBlast.isActive
+        ) {
+          this.state.powerups.squareBlast.isActive = true;
+          squareBlastBtn.textContent = "Active";
+          squareBlastBtn.classList.add("bg-green-500/40");
+          this.addConsoleMessage(
+            "Square Blast powerup activated! Your next attack will hit a 2x2 area."
+          );
+        }
+      });
+    }
+
+    const radarBtn = document.querySelector("#activate-radar");
+    if (radarBtn) {
+      radarBtn.addEventListener("click", () => {
+        if (
+          this.state.powerups.radar.count > 0 &&
+          !this.state.powerups.radar.isActive
+        ) {
+          this.state.powerups.radar.isActive = true;
+          radarBtn.textContent = "Active";
+          radarBtn.classList.add("bg-blue-500/40");
+          this.addConsoleMessage(
+            "Radar activated! Click anywhere on enemy waters to scan a 3x3 area."
+          );
+        }
+      });
+    }
   }
 
+  getScanArea(x, y) {
+    const letters = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"];
+    const yIndex = letters.indexOf(y.toLowerCase());
+    const scanArea = [];
+
+    for (let dy = -1; dy <= 1; dy++) {
+      for (let dx = -1; dx <= 1; dx++) {
+        const newX = x + dx;
+        const newY = yIndex + dy;
+        if (
+          newX >= 0 &&
+          newX < this.GRID_SIZE &&
+          newY >= 0 &&
+          newY < this.GRID_SIZE
+        ) {
+          scanArea.push([newX, letters[newY]]);
+        }
+      }
+    }
+    return scanArea;
+  }
   handleGridClick(e) {
     if (!e.target.classList.contains("cell")) return;
 
     const grid = e.target.closest(".grid");
-    const x = e.target.dataset.x;
+    const x = parseInt(e.target.dataset.x);
     const y = e.target.dataset.y;
 
     if (this.state.gameState === this.GAME_STATES.OVER) {
@@ -218,6 +283,70 @@ class BattleshipGame {
       this.state.yourTurn
     ) {
       if (grid.id === "enemy-grid") {
+        if (this.state.powerups.radar.isActive) {
+          const scanArea = this.getScanArea(parseInt(x), y);
+          const highlightedCells = [];
+
+          // Highlight scan area
+          scanArea.forEach(([scanX, scanY]) => {
+            const scanCell = grid.querySelector(
+              `td[data-x="${scanX}"][data-y="${scanY}"]`
+            );
+            if (scanCell) {
+              scanCell.classList.add("radar-scanning");
+              highlightedCells.push(scanCell);
+            }
+          });
+
+          this.socket.emit("clickOnEnemyGrid", {
+            x: parseInt(x),
+            y,
+            isRadarScan: true,
+          });
+
+          this.state.powerups.radar.isActive = false;
+          this.state.powerups.radar.count--;
+
+          const btn = document.querySelector("#activate-radar");
+          btn.textContent = "Used";
+          btn.disabled = true;
+          btn.classList.remove("bg-blue-500/40");
+
+          setTimeout(() => {
+            highlightedCells.forEach((cell) => {
+              cell.classList.remove("radar-scanning");
+            });
+          }, 1000);
+
+          return;
+        }
+
+        if (this.state.powerups.squareBlast.isActive) {
+          if (x >= this.GRID_SIZE - 1 || y >= this.GRID_SIZE - 1) {
+            this.addConsoleMessage(
+              "Cannot use Square Blast here - not enough space for 2x2 area!"
+            );
+            return;
+          }
+
+          this.socket.emit("clickOnEnemyGrid", {
+            x,
+            y,
+            isSquareBlast: true,
+          });
+
+          this.state.powerups.squareBlast.isActive = false;
+          this.state.powerups.squareBlast.count--;
+
+          const btn = document.querySelector("#activate-square-blast");
+          btn.textContent = "Used";
+          btn.disabled = true;
+          btn.classList.remove("bg-green-500/40");
+
+          this.addConsoleMessage("Square Blast powerup used!");
+          return;
+        }
+
         this.socket.emit("clickOnEnemyGrid", { x, y });
       } else {
         this.addConsoleMessage(this.MESSAGES.ERROR_WRONG_GRID);
@@ -231,7 +360,7 @@ class BattleshipGame {
         );
       } else {
         this.socket.emit("clickOnFriendlyGrid", {
-          x: parseInt(x),
+          x,
           y,
           shipType: this.state.selectedShipType,
           isVertical: this.state.isVertical,

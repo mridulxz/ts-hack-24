@@ -12,6 +12,12 @@ export default class GameState {
     this.yourTurn = false;
     this.selectedShipType = null;
     this.isVertical = false;
+    this.powerups = {
+      squareBlast: {
+        count: 1,
+        isActive: false,
+      },
+    };
     this.placedShips = Object.keys(SHIPS).reduce(
       (acc, ship) => ({ ...acc, [ship]: false }),
       {}
