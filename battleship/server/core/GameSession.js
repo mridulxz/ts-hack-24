@@ -1,5 +1,5 @@
 const config = require("../config");
-const { createEmptyGrid, isValidCoordinate } = require("../utils/gameUtils");
+const {createEmptyGrid, isValidCoordinate} = require("../utils/gameUtils");
 const GameStateManager = require("./GameStateManager");
 
 class GameSession {
@@ -17,16 +17,10 @@ class GameSession {
     return this.game.players.find((player) => player.id !== this.playerId).id;
   }
 
-  handleShipPlacement({ x, y, shipType, isVertical }) {
+  handleShipPlacement({x, y, shipType, isVertical}) {
     if (this.game.gameState !== config.GAME_STATES.SETTING_SHIPS) return;
-    if (
-      !config.SHIPS[shipType] ||
-      this.game[`${this.playerId}_placedShips`][shipType]
-    ) {
-      this.socket.emit(
-        "message",
-        "Invalid ship selection or ship already placed"
-      );
+    if (!config.SHIPS[shipType] || this.game[`${this.playerId}_placedShips`][shipType]) {
+      this.socket.emit("message", "Invalid ship selection or ship already placed");
       return;
     }
 
@@ -34,10 +28,7 @@ class GameSession {
     y = config.LETTERS.indexOf(y);
 
     if (!this.isValidShipPlacement(x, y, size, isVertical)) {
-      this.socket.emit(
-        "message",
-        "Invalid ship placement! Try another position."
-      );
+      this.socket.emit("message", "Invalid ship placement! Try another position.");
       return;
     }
 
@@ -46,7 +37,7 @@ class GameSession {
     this.game[`${this.playerId}_shipCellsPlaced`] += size;
     this.game[`${this.playerId}_shipsPlaced`]++;
 
-    this.socket.emit("shipPlaced", { shipType });
+    this.socket.emit("shipPlaced", {shipType});
     this.socket.emit("updateGrid", {
       gridToUpdate: "friendlyGrid",
       data: this.game[`${this.playerId}_grid`],
@@ -62,10 +53,7 @@ class GameSession {
       const checkX = isVertical ? x : x + i;
       const checkY = isVertical ? y + i : y;
 
-      if (
-        !isValidCoordinate(checkX, checkY, config.GRID_SIZE) ||
-        grid[checkY][checkX] === 1
-      ) {
+      if (!isValidCoordinate(checkX, checkY, config.GRID_SIZE) || grid[checkY][checkX] === 1) {
         return false;
       }
     }
@@ -83,7 +71,7 @@ class GameSession {
     }
   }
 
-  handleAttack({ x, y, isSquareBlast, isRadarScan }) {
+  handleAttack({x, y, isSquareBlast, isRadarScan}) {
     if (this.game.gameState !== config.GAME_STATES.RUNNING) return;
 
     const otherPlayerId = this.getOtherPlayerId();
@@ -106,12 +94,10 @@ class GameSession {
       for (const [scanY, scanX] of scanPositions) {
         const cell = this.game[`${otherPlayerId}_grid`][scanY][scanX];
         if (cell === 1) {
-          // 1 represents an unhit ship
           shipsDetected++;
         }
       }
 
-      // Send detailed feedback
       if (shipsDetected > 0) {
         let message;
         if (shipsDetected === 1) {
@@ -123,24 +109,15 @@ class GameSession {
         }
 
         this.socket.emit("message", message);
-        this.socket.broadcast
-          .to(this.gameId)
-          .emit("message", "Enemy radar has scanned your ships!");
+        this.socket.broadcast.to(this.gameId).emit("message", "Enemy radar has scanned your ships!");
       } else {
-        this.socket.emit(
-          "message",
-          "Radar scan complete: Area is clear of ships."
-        );
-        this.socket.broadcast
-          .to(this.gameId)
-          .emit("message", "Enemy radar has scanned your waters.");
+        this.socket.emit("message", "Radar scan complete: Area is clear of ships.");
+        this.socket.broadcast.to(this.gameId).emit("message", "Enemy radar has scanned your waters.");
       }
 
-      // Don't update grids or change turns for radar
       return;
     }
 
-    // Handle Square Blast
     if (isSquareBlast) {
       const hitPositions = [
         [y, x], // Top left
@@ -171,34 +148,23 @@ class GameSession {
         }
       }
 
-      if (totalHits > 0) {
-        this.socket.emit(
-          "message",
-          `Square Blast hit ${totalHits} ship parts!`
-        );
-        this.socket.broadcast
-          .to(this.gameId)
-          .emit(
-            "message",
-            `Enemy's Square Blast hit ${totalHits} of your ship parts!`
-          );
+      this.updateGrids();
 
-        if (
-          this.game[`${otherPlayerId}_shipsLost`] >= config.TOTAL_SHIP_CELLS
-        ) {
+      if (totalHits > 0) {
+        this.socket.emit("message", `Square Blast hit ${totalHits} ship parts!`);
+        this.socket.broadcast.to(this.gameId).emit("message", `Enemy's Square Blast hit ${totalHits} of your ship parts!`);
+
+        if (this.game[`${otherPlayerId}_shipsLost`] >= config.TOTAL_SHIP_CELLS) {
           this.handleGameOver();
           return;
         }
       } else {
         this.socket.emit("message", "Square Blast missed all targets!");
-        this.socket.broadcast
-          .to(this.gameId)
-          .emit("message", "Enemy's Square Blast missed completely!");
+        this.socket.broadcast.to(this.gameId).emit("message", "Enemy's Square Blast missed completely!");
       }
 
       this.nextTurn();
     } else {
-      // Regular single-cell attack
       const targetCell = this.game[`${otherPlayerId}_grid`][y][x];
 
       if (targetCell === 2 || targetCell === 3) {
@@ -210,29 +176,27 @@ class GameSession {
       this.game[`${otherPlayerId}_grid`][y][x] = hit ? 3 : 2;
       this.otherPlayerGrid[y][x] = hit ? 3 : 2;
 
+      this.updateGrids();
+
       if (hit) {
         this.game[`${otherPlayerId}_shipsLost`]++;
 
-        if (
-          this.game[`${otherPlayerId}_shipsLost`] >= config.TOTAL_SHIP_CELLS
-        ) {
+        this.socket.emit("message", "Direct hit! Take another shot!");
+        this.socket.broadcast.to(this.gameId).emit("message", "Your ship was hit!");
+
+        // Check for game over after updating grids
+        if (this.game[`${otherPlayerId}_shipsLost`] >= config.TOTAL_SHIP_CELLS) {
           this.handleGameOver();
           return;
         }
-
-        this.socket.emit("message", "Direct hit! Take another shot!");
-        this.socket.broadcast
-          .to(this.gameId)
-          .emit("message", "Your ship was hit!");
       } else {
         this.socket.emit("message", "Miss! You hit water!");
         this.socket.broadcast.to(this.gameId).emit("message", "Enemy missed!");
         this.nextTurn();
       }
     }
-
-    this.updateGrids();
   }
+
   updateGrids() {
     this.socket.emit("updateGrid", {
       gridToUpdate: "enemyGrid",
@@ -265,34 +229,18 @@ class GameSession {
     this.game.gameState = config.GAME_STATES.OVER;
     this.io.to(this.gameId).emit("changeGameState", config.GAME_STATES.OVER);
     this.socket.emit("message", "Victory! All enemy ships destroyed!");
-    this.socket.broadcast
-      .to(this.gameId)
-      .emit("message", "Defeat! All ships lost!");
-    this.io
-      .to(this.gameId)
-      .emit(
-        "message",
-        `${this.playerName} wins! Returning to menu in 10 seconds...`
-      );
+    this.socket.broadcast.to(this.gameId).emit("message", "Defeat! All ships lost!");
+    this.io.to(this.gameId).emit("message", `${this.playerName} wins! Returning to menu in 10 seconds...`);
   }
 
   handleDisconnect() {
-    this.io
-      .to(this.gameId)
-      .emit("message", `${this.playerName} has left the game.`);
+    this.io.to(this.gameId).emit("message", `${this.playerName} has left the game.`);
 
-    this.game.players = this.game.players.filter(
-      (player) => player.id !== this.playerId
-    );
+    this.game.players = this.game.players.filter((player) => player.id !== this.playerId);
     this.game.gameState = config.GAME_STATES.OVER;
 
     this.io.to(this.gameId).emit("changeGameState", config.GAME_STATES.OVER);
-    this.io
-      .to(this.gameId)
-      .emit(
-        "message",
-        "Game over - opponent disconnected! Returning to menu in 10 seconds..."
-      );
+    this.io.to(this.gameId).emit("message", "Game over - opponent disconnected! Returning to menu in 10 seconds...");
 
     if (this.game.players.length === 0) {
       GameStateManager.removeGame(this.gameId);
@@ -306,12 +254,8 @@ class GameSession {
 
     if (player1Ships === allShipsPlaced && player2Ships === allShipsPlaced) {
       this.game.gameState = config.GAME_STATES.RUNNING;
-      this.io
-        .to(this.gameId)
-        .emit("changeGameState", config.GAME_STATES.RUNNING);
-      this.io
-        .to(this.gameId)
-        .emit("message", "All ships placed! Battle begins!");
+      this.io.to(this.gameId).emit("changeGameState", config.GAME_STATES.RUNNING);
+      this.io.to(this.gameId).emit("message", "All ships placed! Battle begins!");
       this.io.to(this.gameId).emit("nextRound");
 
       this.socket.emit("yourTurn", false);
