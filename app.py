@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask, render_template
+from flask import Flask, redirect, render_template, url_for
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
@@ -23,7 +23,7 @@ def careers():
 
 @app.route("/about")
 def about():
-    return render_template("about.html", active_page="about", dice_num=4)
+    return redirect(url_for("home"))
 
 
 if __name__ == "__main__":
