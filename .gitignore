@@ -1,3 +1,5 @@
+.claudesync
+.env
 node_modules
 __pycache__
 flask_session
