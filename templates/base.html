@@ -8,13 +8,9 @@
   <link rel="icon" href="/static/favicon.ico" type="image/x-icon" />
   <link rel="preload" href="/static/fonts/CabinetGrotesk-Variable.ttf" as="font" crossorigin />
   <link rel="prefetch" as="image" href="/static/ship.png" />
-  <link rel="prefetch" as="image" href="/static/dice{{ dice_num }}.png" />
-  <link href="/static/css/general-sans.css" rel="stylesheet" />
+  <link href="/static/css/style.css" rel="stylesheet" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&family=Fira+Mono:wght@400;500;700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
-    rel="stylesheet" />
   <title>The Bored Games</title>
 </head>
 
@@ -32,9 +28,6 @@
       <div class="flex items-center gap-4">
         <a href="/"><img src="/static/logo.png" alt="logo" class="h-12" /></a>
       </div>
-      <!-- <div class="absolute top-2 left-1/2 w-[50px]"> -->
-      <!--   <img class="absolute left-0 pointer-events-none" src="/static/dice{{ dice_num }}.png" alt="Dice" /> -->
-      <!-- </div> -->
       <div class="flex gap-6 items-center">
         {{ nav_item('/careers', 'Careers', 'careers') }} {{ nav_item('/about', 'About', 'about') }}
         <a href="/shop"

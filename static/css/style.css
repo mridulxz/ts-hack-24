@@ -1,0 +1,33 @@
+@font-face {
+  font-family: "CabinetGrotesk";
+  src: url("/static/fonts/CabinetGrotesk-Variable.ttf")
+    format("truetype-variations");
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+.marquee {
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.marquee span {
+  display: inline-block;
+  padding-left: 100%;
+  animation: marquee 40s linear infinite;
+}
+
+.marquee2 span {
+  animation-delay: 5s;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translate(0, 0);
+  }
+
+  100% {
+    transform: translate(-100%, 0);
+  }
+}

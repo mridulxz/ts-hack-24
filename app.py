@@ -8,17 +8,17 @@ app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev")
 
 @app.route("/")
 def home():
-    return render_template("index.html", active_page="home", dice_num=1)
+    return render_template("index.html", active_page="home")
 
 
 @app.route("/shop")
 def shop():
-    return render_template("shop.html", active_page="shop", dice_num=2)
+    return render_template("shop.html", active_page="shop")
 
 
 @app.route("/careers")
 def careers():
-    return render_template("careers.html", active_page="careers", dice_num=3)
+    return render_template("careers.html", active_page="careers")
 
 
 @app.route("/about")
